@@ -86,7 +86,11 @@ def prepare_external_docs(
 
     if not external_root.exists():
         skipped["missing_sources"] = list(SUPPORTED_SOURCES)
-    for source_name in SUPPORTED_SOURCES:
+    discovered_sources = []
+    if external_root.exists():
+        discovered_sources = sorted(path.name for path in external_root.iterdir() if path.is_dir())
+    source_names = list(dict.fromkeys([*SUPPORTED_SOURCES, *discovered_sources]))
+    for source_name in source_names:
         source_root = external_root / source_name
         if not source_root.exists():
             if source_name not in skipped["missing_sources"]:

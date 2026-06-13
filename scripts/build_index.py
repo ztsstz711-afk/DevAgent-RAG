@@ -29,11 +29,19 @@ def build_index(
     imported_root = project_path(
         imported_docs_dir or external_config.get("imported_docs_dir", "data/docs_imported")
     )
+    uploaded_root = project_path(config.get("web", {}).get("uploaded_docs_dir", "data/docs_uploaded"))
 
     sample_documents = load_documents(sample_root)
     imported_documents = load_documents(imported_root) if external_config.get("enabled", True) else []
     imported_documents = [{**document, "is_imported": True} for document in imported_documents]
-    documents = [normalize_document(document) for document in [*sample_documents, *imported_documents]]
+    uploaded_documents = [
+        {**document, "product": "uploaded", "is_uploaded": True}
+        for document in load_documents(uploaded_root)
+    ]
+    documents = [
+        normalize_document(document)
+        for document in [*sample_documents, *imported_documents, *uploaded_documents]
+    ]
     if not documents:
         raise ValueError("Cannot build an index without sample or imported documents")
     chunks = split_documents(documents, **config["chunking"])
@@ -50,6 +58,7 @@ def build_index(
         "documents_per_source": dict(sorted(documents_per_source.items())),
         "chunks_per_source": dict(sorted(chunks_per_source.items())),
         "imported_docs_count": sum(bool(document.get("is_imported")) for document in documents),
+        "uploaded_docs_count": sum(bool(document.get("is_uploaded")) for document in documents),
         "retrieval_mode": config.get("retrieval", {}).get("mode", "tfidf"),
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }

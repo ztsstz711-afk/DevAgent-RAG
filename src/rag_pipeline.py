@@ -17,12 +17,15 @@ class RAGPipeline:
         retriever=None,
         llm_mode: str | None = None,
         retrieval_mode: str | None = None,
+        top_k: int | None = None,
     ):
         self.config = load_config(config_path)
         if llm_mode is not None:
             self.config.setdefault("llm_answer", {})["enabled"] = llm_mode == "openai"
             self.config["llm_answer"]["mode"] = llm_mode
         retrieval_config = self.config.setdefault("retrieval", {})
+        if top_k is not None:
+            retrieval_config["top_k"] = int(top_k)
         requested_mode = retrieval_mode or retrieval_config.get("mode", "tfidf")
         retrieval_config["mode"] = requested_mode
         index_path = project_path(self.config["paths"]["index"])

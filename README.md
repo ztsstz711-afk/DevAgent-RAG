@@ -38,6 +38,25 @@ python scripts/retrieval_eval.py
 python -m unittest discover -s tests -v
 ```
 
+## Streamlit Web Demo
+
+本地 Web 控制台是现有 CLI 与 Python 模块的展示和操作入口，核心 Agent、索引、导入和评估逻辑仍位于 `src/` 与 `scripts/`，没有在前端重复实现。
+
+```bash
+streamlit run app.py
+```
+
+Web 控制台支持：
+
+- 上传 `.md`、`.mdx`、`.txt`、`.ipynb` 到本地知识库。
+- 输入合法的 `https://github.com/org/repo` 地址并执行受限的 `git clone`。
+- 导入 external docs、重建索引并查看文档与 chunk 统计。
+- 选择 TF-IDF、embedding 或 hybrid retrieval，提交技术问题或错误日志。
+- 查看 task type、回答、质量报告、citation、检索 chunk 和 tool trace。
+- 运行并预览 Agent eval 与 retrieval eval 报告。
+
+Web UI 默认使用 template answer，不需要 `OPENAI_API_KEY`。设置 key 后可选择 OpenAI-compatible LLM Answer；页面只显示 key 是否已配置，不展示 key 内容。该界面用于本地演示，不提供多用户权限隔离或公网部署安全能力。
+
 ## 检索模式
 
 在 `configs/default.yaml` 中配置：

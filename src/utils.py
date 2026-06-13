@@ -48,6 +48,10 @@ def load_config(path: str | Path = "configs/default.yaml") -> dict[str, Any]:
             "max_external_docs_per_source": 30,
             "max_file_size_kb": 512,
         },
+        "web": {
+            "uploaded_docs_dir": "data/docs_uploaded",
+            "allow_github_clone": True,
+        },
     }
 
 

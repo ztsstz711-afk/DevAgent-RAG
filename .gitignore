@@ -12,4 +12,5 @@ __pycache__/
 *.log
 external/
 data/docs_imported/
+data/docs_uploaded/
 data/index/
