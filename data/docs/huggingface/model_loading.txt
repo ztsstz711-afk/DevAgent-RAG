@@ -1,0 +1,8 @@
+HuggingFace Model Loading
+
+Load models with from_pretrained. For constrained devices, use an appropriate dtype, device_map, or quantization. Confirm that required packages are installed when ModuleNotFoundError appears.
+
+```python
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(name, device_map="auto")
+```

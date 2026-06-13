@@ -1,0 +1,7 @@
+langchain
+langgraph
+scikit-learn
+pyyaml
+joblib
+sentence-transformers
+numpy
