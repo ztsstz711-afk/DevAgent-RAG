@@ -1,0 +1,31 @@
+{
+  "total_documents": 16,
+  "total_chunks": 33,
+  "sources": [
+    "huggingface",
+    "langchain",
+    "llamafactory",
+    "openai",
+    "pytorch",
+    "vllm"
+  ],
+  "documents_per_source": {
+    "huggingface": 2,
+    "langchain": 3,
+    "llamafactory": 2,
+    "openai": 4,
+    "pytorch": 3,
+    "vllm": 2
+  },
+  "chunks_per_source": {
+    "huggingface": 4,
+    "langchain": 6,
+    "llamafactory": 4,
+    "openai": 9,
+    "pytorch": 6,
+    "vllm": 4
+  },
+  "imported_docs_count": 0,
+  "retrieval_mode": "tfidf",
+  "generated_at": "2026-06-13T09:57:25.368304+00:00"
+}

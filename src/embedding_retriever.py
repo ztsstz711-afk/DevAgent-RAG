@@ -47,12 +47,15 @@ class EmbeddingRetriever:
                 "Install requirements.txt; TF-IDF retrieval is still available."
             )
         try:
-            self.model = SentenceTransformer(self.model_name)
-        except Exception as exc:
-            raise EmbeddingUnavailableError(
-                f"Could not load embedding model '{self.model_name}': {exc}. "
-                "Check model availability or use retrieval.mode=tfidf."
-            ) from exc
+            self.model = SentenceTransformer(self.model_name, local_files_only=True)
+        except Exception:
+            try:
+                self.model = SentenceTransformer(self.model_name)
+            except Exception as exc:
+                raise EmbeddingUnavailableError(
+                    f"Could not load embedding model '{self.model_name}': {exc}. "
+                    "Check model availability or use retrieval.mode=tfidf."
+                ) from exc
         return self.model
 
     def build_index(self, chunks: list[dict]) -> "EmbeddingRetriever":

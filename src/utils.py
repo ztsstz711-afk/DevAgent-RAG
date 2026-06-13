@@ -41,6 +41,13 @@ def load_config(path: str | Path = "configs/default.yaml") -> dict[str, Any]:
             "base_url_env": "OPENAI_BASE_URL",
             "model_env": "OPENAI_MODEL",
         },
+        "external_docs": {
+            "enabled": True,
+            "external_dir": "external",
+            "imported_docs_dir": "data/docs_imported",
+            "max_external_docs_per_source": 30,
+            "max_file_size_kb": 512,
+        },
     }
 
 

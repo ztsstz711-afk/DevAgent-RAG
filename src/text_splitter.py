@@ -63,9 +63,13 @@ def split_document(document: dict, max_chars: int = 1200, overlap: int = 120) ->
             "product": document["product"],
             "path": document.get("path", ""),
             "source_path": document.get("path", ""),
-            "title": document["source"].rsplit(".", 1)[0].replace("_", " "),
+            "title": document.get("title", document["source"].rsplit(".", 1)[0].replace("_", " ")),
             "section_title": section_title,
             "has_code": "```" in content,
+            "original_path": document.get("original_path", document.get("path", "")),
+            "imported_path": document.get("imported_path"),
+            "file_type": document.get("file_type", document.get("extension", "")),
+            "is_imported": document.get("is_imported", False),
             "chunk_id": f"chunk_{index:03d}",
         })
     return chunks
