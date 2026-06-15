@@ -212,13 +212,13 @@
     },
     "embedding": {
       "requested_mode": "embedding",
-      "effective_mode": "tfidf",
-      "retriever_backend": "sklearn_tfidf_fallback",
-      "fallback_reason": "test embedding unavailable",
-      "hit_at_1": 0.923,
-      "hit_at_3": 0.923,
-      "retrieval_non_empty_rate": 0.933,
-      "valid_evidence_hit_rate": 0.923,
+      "effective_mode": "embedding",
+      "retriever_backend": "sentence_transformers",
+      "fallback_reason": null,
+      "hit_at_1": 1.0,
+      "hit_at_3": 1.0,
+      "retrieval_non_empty_rate": 1.0,
+      "valid_evidence_hit_rate": 1.0,
       "unsupported_refusal_rate": 1.0,
       "details": [
         {
@@ -227,7 +227,7 @@
           "top_products": [
             "openai",
             "openai",
-            "openai"
+            "vllm"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -265,7 +265,7 @@
           "expected_product": "langchain",
           "top_products": [
             "langchain",
-            "llamafactory",
+            "langchain",
             "langchain"
           ],
           "non_empty": true,
@@ -279,7 +279,7 @@
           "top_products": [
             "langchain",
             "langchain",
-            "llamafactory"
+            "langchain"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -292,7 +292,7 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "llamafactory"
+            "pytorch"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -305,7 +305,7 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "llamafactory"
+            "pytorch"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -355,7 +355,7 @@
           "question": "ModuleNotFoundError: No module named transformers",
           "expected_product": "huggingface",
           "top_products": [
-            "llamafactory",
+            "huggingface",
             "llamafactory",
             "llamafactory"
           ],
@@ -369,7 +369,8 @@
           "expected_product": "openai",
           "top_products": [
             "openai",
-            "openai"
+            "openai",
+            "vllm"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -382,7 +383,7 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "huggingface"
+            "pytorch"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -393,7 +394,7 @@
           "question": "How to deploy Kubernetes on AWS?",
           "expected_product": null,
           "top_products": [
-            "llamafactory",
+            "openai",
             "llamafactory",
             "llamafactory"
           ],
@@ -408,8 +409,12 @@
         {
           "question": "How to price an insurance product?",
           "expected_product": null,
-          "top_products": [],
-          "non_empty": false,
+          "top_products": [
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
+          ],
+          "non_empty": true,
           "valid_evidence": false,
           "evidence_issues": [
             "no_evidence",
@@ -421,13 +426,13 @@
     },
     "hybrid": {
       "requested_mode": "hybrid",
-      "effective_mode": "tfidf",
-      "retriever_backend": "sklearn_tfidf_fallback",
-      "fallback_reason": "test embedding unavailable",
-      "hit_at_1": 0.923,
-      "hit_at_3": 0.923,
-      "retrieval_non_empty_rate": 0.933,
-      "valid_evidence_hit_rate": 0.923,
+      "effective_mode": "hybrid",
+      "retriever_backend": "hybrid_tfidf_embedding",
+      "fallback_reason": null,
+      "hit_at_1": 1.0,
+      "hit_at_3": 1.0,
+      "retrieval_non_empty_rate": 1.0,
+      "valid_evidence_hit_rate": 1.0,
       "unsupported_refusal_rate": 1.0,
       "details": [
         {
@@ -436,7 +441,7 @@
           "top_products": [
             "openai",
             "openai",
-            "openai"
+            "vllm"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -474,7 +479,7 @@
           "expected_product": "langchain",
           "top_products": [
             "langchain",
-            "llamafactory",
+            "langchain",
             "langchain"
           ],
           "non_empty": true,
@@ -488,7 +493,7 @@
           "top_products": [
             "langchain",
             "langchain",
-            "llamafactory"
+            "langchain"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -501,7 +506,7 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "llamafactory"
+            "pytorch"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -564,7 +569,7 @@
           "question": "ModuleNotFoundError: No module named transformers",
           "expected_product": "huggingface",
           "top_products": [
-            "llamafactory",
+            "huggingface",
             "llamafactory",
             "llamafactory"
           ],
@@ -578,7 +583,8 @@
           "expected_product": "openai",
           "top_products": [
             "openai",
-            "openai"
+            "openai",
+            "vllm"
           ],
           "non_empty": true,
           "valid_evidence": true,
@@ -603,7 +609,7 @@
           "expected_product": null,
           "top_products": [
             "llamafactory",
-            "llamafactory",
+            "openai",
             "llamafactory"
           ],
           "non_empty": true,
@@ -617,8 +623,12 @@
         {
           "question": "How to price an insurance product?",
           "expected_product": null,
-          "top_products": [],
-          "non_empty": false,
+          "top_products": [
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
+          ],
+          "non_empty": true,
           "valid_evidence": false,
           "evidence_issues": [
             "no_evidence",
