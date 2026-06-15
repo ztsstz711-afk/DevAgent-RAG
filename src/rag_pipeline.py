@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 
 from .embedding_retriever import EmbeddingRetriever, EmbeddingUnavailableError
+from .answer_generator import NO_EVIDENCE_ANSWER
 from .graph_builder import GRAPH_BACKEND, build_graph
 from .hybrid_retriever import HybridRetriever
 from .retriever import RETRIEVER_BACKEND, TfidfRetriever
@@ -68,6 +69,14 @@ class RAGPipeline:
 
     def ask(self, question: str, write_trace: bool = True) -> dict:
         result = self.graph.invoke({"question": question, "tool_trace": []})
+        assessment = result.get("evidence_assessment", {})
+        if assessment and not assessment.get("valid", False):
+            result["answer"] = NO_EVIDENCE_ANSWER
+            result["quality"]["passed"] = False
+            result["quality"]["citations"] = []
+            result["quality"]["issues"] = list(dict.fromkeys([
+                *result["quality"].get("issues", []), *assessment.get("issues", []), "no_evidence"
+            ]))
         if write_trace:
             trace_path = Path(self.config["paths"]["output"]) / "tool_trace.jsonl"
             append_jsonl(trace_path, {"question": question, "route": result["route"], "trace": result["tool_trace"]})

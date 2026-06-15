@@ -24,5 +24,15 @@ def code_snippet_finder_tool(
     return candidates[:top_k]
 
 
-def quality_check_tool(answer: str, min_citations: int = 1, no_evidence: bool = False) -> dict:
-    return check_quality(answer, min_citations=min_citations, no_evidence=no_evidence)
+def quality_check_tool(
+    answer: str,
+    min_citations: int = 1,
+    no_evidence: bool = False,
+    evidence_issues: list[str] | None = None,
+) -> dict:
+    return check_quality(
+        answer,
+        min_citations=min_citations,
+        no_evidence=no_evidence,
+        evidence_issues=evidence_issues,
+    )

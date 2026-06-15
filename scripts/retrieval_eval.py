@@ -10,6 +10,7 @@ from scripts.build_index import build_index
 from scripts.evaluate import CASES
 from scripts.prepare_sample_docs import prepare_sample_docs
 from src.rag_pipeline import RAGPipeline
+from src.evidence_gate import assess_evidence
 from src.utils import project_path, write_json
 
 
@@ -22,6 +23,8 @@ def _evaluate_mode(mode: str) -> dict:
     hit_1 = 0
     hit_3 = 0
     non_empty = 0
+    valid_evidence_hits = 0
+    unsupported_refusals = 0
     details = []
     for case in CASES:
         results = pipeline.retriever.search(
@@ -31,14 +34,24 @@ def _evaluate_mode(mode: str) -> dict:
         )
         products = [item.get("product") for item in results]
         non_empty += bool(results)
+        assessment = assess_evidence(
+            case["question"], results, min_score=pipeline.config["retrieval"].get("min_score", 0.05)
+        )
         if case["product"] is not None:
-            hit_1 += bool(products) and products[0] == case["product"]
-            hit_3 += case["product"] in products[:3]
+            valid_hit = assessment["valid"] and case["product"] in products
+            valid_evidence_hits += valid_hit
+            hit_1 += assessment["valid"] and bool(products) and products[0] == case["product"]
+            hit_3 += assessment["valid"] and case["product"] in products[:3]
+        else:
+            unsupported_refusals += not assessment["valid"]
         details.append({
             "question": case["question"],
             "expected_product": case["product"],
             "top_products": products,
             "non_empty": bool(results),
+            "valid_evidence": assessment["valid"],
+            "evidence_issues": assessment["issues"],
+            "unsupported_refusal": case["product"] is None and not assessment["valid"],
         })
     return {
         "requested_mode": mode,
@@ -48,6 +61,10 @@ def _evaluate_mode(mode: str) -> dict:
         "hit_at_1": round(hit_1 / len(supported), 3),
         "hit_at_3": round(hit_3 / len(supported), 3),
         "retrieval_non_empty_rate": round(non_empty / len(CASES), 3),
+        "valid_evidence_hit_rate": round(valid_evidence_hits / len(supported), 3),
+        "unsupported_refusal_rate": round(
+            unsupported_refusals / max(1, len(CASES) - len(supported)), 3
+        ),
         "details": details,
     }
 
@@ -58,8 +75,8 @@ def _write_markdown(report: dict) -> Path:
         "",
         "This comparison uses the built-in sample documents and does not represent production quality.",
         "",
-        "| Requested mode | Effective mode | Backend | Hit@1 | Hit@3 | Non-empty rate | Fallback |",
-        "|---|---|---|---:|---:|---:|---|",
+        "| Requested mode | Effective mode | Backend | Hit@1 | Hit@3 | Non-empty | Valid evidence | Unsupported refusal | Fallback |",
+        "|---|---|---|---:|---:|---:|---:|---:|---|",
     ]
     for mode in MODES:
         item = report["modes"][mode]
@@ -67,7 +84,8 @@ def _write_markdown(report: dict) -> Path:
         lines.append(
             f"| {mode} | {item['effective_mode']} | {item['retriever_backend']} | "
             f"{item['hit_at_1']:.1%} | {item['hit_at_3']:.1%} | "
-            f"{item['retrieval_non_empty_rate']:.1%} | {reason} |"
+            f"{item['retrieval_non_empty_rate']:.1%} | {item['valid_evidence_hit_rate']:.1%} | "
+            f"{item['unsupported_refusal_rate']:.1%} | {reason} |"
         )
     target = project_path("data/output/retrieval_eval.md")
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -91,7 +109,9 @@ if __name__ == "__main__":
         print(
             f"{mode}: effective={item['effective_mode']}, backend={item['retriever_backend']}, "
             f"Hit@1={item['hit_at_1']:.1%}, Hit@3={item['hit_at_3']:.1%}, "
-            f"non_empty={item['retrieval_non_empty_rate']:.1%}"
+            f"non_empty={item['retrieval_non_empty_rate']:.1%}, "
+            f"valid_evidence={item['valid_evidence_hit_rate']:.1%}, "
+            f"unsupported_refusal={item['unsupported_refusal_rate']:.1%}"
         )
         if item["fallback_reason"]:
             print(f"  fallback: {item['fallback_reason']}")

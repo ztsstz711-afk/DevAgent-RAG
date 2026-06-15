@@ -19,6 +19,15 @@ class QualityCheckerTests(unittest.TestCase):
         self.assertIn("no_evidence", result["issues"])
         self.assertNotIn("answer_too_short", result["issues"])
 
+    def test_preserves_out_of_domain_issue(self):
+        result = check_quality(
+            "未在当前文档知识库中找到明确依据。",
+            no_evidence=True,
+            evidence_issues=["no_evidence", "out_of_domain"],
+        )
+        self.assertFalse(result["passed"])
+        self.assertIn("out_of_domain", result["issues"])
+
 
 if __name__ == "__main__":
     unittest.main()

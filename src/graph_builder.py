@@ -8,6 +8,7 @@ except ImportError:  # The real LangGraph path is used whenever dependencies are
     GRAPH_BACKEND = "fallback"
 
 from .agent_state import AgentState
+from .evidence_gate import assess_evidence
 from .llm_answer import LLMAnswerGenerator
 from .tools import code_snippet_finder_tool, doc_search_tool, error_parser_tool, quality_check_tool
 
@@ -38,18 +39,31 @@ def build_graph(retriever, config: dict | None = None):
             state["question"], retriever,
             top_k=retrieval.get("top_k", 4), min_score=retrieval.get("min_score", 0.01),
         )
+        assessment = assess_evidence(
+            state["question"], result, min_score=float(retrieval.get("min_score", 0.05))
+        )
         compact = [{"citation": f"{x['product']}/{x['source']}/{x['chunk_id']}", "score": x["score"]} for x in result]
-        return {"documents": result, "tool_trace": _trace(state, "doc_search_tool", compact)}
+        return {
+            "documents": result,
+            "valid_documents": result if assessment["valid"] else [],
+            "evidence_assessment": assessment,
+            "tool_trace": _trace(
+                state, "doc_search_tool", {"results": compact, "evidence_assessment": assessment}
+            ),
+        }
 
     def find_code_snippets(state: AgentState) -> dict:
-        preferred_sources = [item["source"] for item in state.get("documents", [])]
+        preferred_sources = [item["source"] for item in state.get("valid_documents", [])]
         result = code_snippet_finder_tool(state["question"], retriever, top_k=2, preferred_sources=preferred_sources)
         compact = [{"citation": f"{x['product']}/{x['source']}/{x['chunk_id']}", "score": x["score"]} for x in result]
         return {"code_snippets": result, "tool_trace": _trace(state, "code_snippet_finder_tool", compact)}
 
     def generate_answer_node(state: AgentState) -> dict:
         generated = answer_generator.generate(
-            state["question"], state.get("documents", []), state.get("error_info"), state.get("code_snippets", [])
+            state["question"],
+            state.get("valid_documents", []),
+            state.get("error_info"),
+            state.get("code_snippets", []) if state.get("valid_documents") else [],
         )
         metadata = {
             "characters": len(generated.answer),
@@ -64,10 +78,12 @@ def build_graph(retriever, config: dict | None = None):
         }
 
     def check_quality_node(state: AgentState) -> dict:
+        assessment = state.get("evidence_assessment", {})
         result = quality_check_tool(
             state["answer"],
             min_citations=quality.get("min_citations", 1),
-            no_evidence=not state.get("documents"),
+            no_evidence=not assessment.get("valid", False),
+            evidence_issues=assessment.get("issues", []),
         )
         return {"quality": result, "tool_trace": _trace(state, "quality_check_tool", result)}
 

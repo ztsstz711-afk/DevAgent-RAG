@@ -82,18 +82,24 @@ def evaluate() -> dict:
         result = pipeline.ask(case["question"], write_trace=False)
         ranked_products = [item["product"] for item in result.get("documents", [])]
         supported = case["product"] is not None
-        retrieval_hit = supported and case["product"] in ranked_products
+        retrieval_non_empty = bool(result.get("documents"))
+        valid_evidence = result.get("evidence_assessment", {}).get("valid", False)
+        retrieval_hit = supported and valid_evidence and case["product"] in ranked_products
         no_evidence = "no_evidence" in result["quality"]["issues"]
+        unsupported_refusal = not supported and no_evidence and not result["quality"]["passed"]
         details.append({
             "question": case["question"],
             "expected_product": case["product"],
             "expected_route": case["route"],
             "actual_route": result["route"],
             "route_hit": result["route"] == case["route"],
+            "retrieval_non_empty": retrieval_non_empty,
+            "valid_evidence_hit": retrieval_hit,
             "retrieval_hit": retrieval_hit,
             "citation_hit": bool(result["quality"]["citations"]),
             "quality_passed": result["quality"]["passed"],
             "no_evidence": no_evidence,
+            "unsupported_refusal": unsupported_refusal,
             "tool_success": _tool_success(result),
             "hit_at_1": supported and bool(ranked_products) and ranked_products[0] == case["product"],
             "hit_at_3": supported and case["product"] in ranked_products[:3],
@@ -113,6 +119,10 @@ def evaluate() -> dict:
         "quality_pass_rate": round(sum(item["quality_passed"] for item in details) / total, 3),
         "no_evidence_count": sum(item["no_evidence"] for item in details),
         "unsupported_query_count": total - supported_count,
+        "unsupported_refusal_count": sum(item["unsupported_refusal"] for item in details),
+        "unsupported_refusal_rate": round(
+            sum(item["unsupported_refusal"] for item in details) / max(1, total - supported_count), 3
+        ),
         "tool_success_rate": round(sum(item["tool_success"] for item in details) / total, 3),
         "hit_at_1": round(sum(item["hit_at_1"] for item in supported_details) / supported_count, 3),
         "hit_at_3": round(sum(item["hit_at_3"] for item in supported_details) / supported_count, 3),

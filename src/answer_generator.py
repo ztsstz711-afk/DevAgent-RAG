@@ -17,8 +17,14 @@ def _summary(text: str, limit: int = 360) -> str:
     return cleaned[:limit].rstrip(" ,.;") + ("..." if len(cleaned) > limit else "")
 
 
-def generate_answer(question: str, documents: list[dict], error_info: dict | None = None, code_snippets: list[dict] | None = None) -> str:
-    if not documents:
+def generate_answer(
+    question: str,
+    documents: list[dict],
+    error_info: dict | None = None,
+    code_snippets: list[dict] | None = None,
+    evidence_valid: bool = True,
+) -> str:
+    if not documents or not evidence_valid:
         return NO_EVIDENCE_ANSWER
     lines = [f"## Answer\n\nFor: `{question}`"]
     if error_info and error_info.get("is_error"):

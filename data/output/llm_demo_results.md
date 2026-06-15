@@ -51,7 +51,7 @@ Detected issue: **cuda_oom**. Start by confirming the failing component and its 
 
 ### Recommended approach
 - PyTorch CUDA Memory CUDA out of memory means the requested allocation exceeded available GPU memory. Reduce batch size or sequence length, enable gradient accumulation or mixed precision, and release unused tensors. Use memory summaries to identify large allocations [pytorch | cuda_memory.md | chunk_001]
-- LLaMAFactory Training LLaMAFactory supports supervised fine-tuning and parameter-efficient methods such as LoRA. For limited GPU memory, reduce per-device batch size, use gradient accumulation, bf16 or fp16, and a shorter cutoff length [llamafactory | training.md | chunk_001]
+- Install PyTorch You need to manually install the GPU version of PyTorch on the Windows platform. Please refer to the [official website](https://pytorch.org/get-started/locally/) and the following command to install PyTorch with CUDA support: [llamafactory | README.md | chunk_056]
 
 ### Example
 

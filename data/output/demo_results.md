@@ -49,7 +49,6 @@ Detected issue: **cuda_oom**. Start by confirming the failing component and its 
 
 ### Recommended approach
 - PyTorch CUDA Memory CUDA out of memory means the requested allocation exceeded available GPU memory. Reduce batch size or sequence length, enable gradient accumulation or mixed precision, and release unused tensors. Use memory summaries to identify large allocations [pytorch | cuda_memory.md | chunk_001]
-- LLaMAFactory Training LLaMAFactory supports supervised fine-tuning and parameter-efficient methods such as LoRA. For limited GPU memory, reduce per-device batch size, use gradient accumulation, bf16 or fp16, and a shorter cutoff length [llamafactory | training.md | chunk_001]
 
 ### Example
 
@@ -76,15 +75,18 @@ For: `ModuleNotFoundError: No module named 'transformers'`
 Detected issue: **module_not_found**. Start by confirming the failing component and its runtime configuration.
 
 ### Recommended approach
-- HuggingFace Model Loading Load models with from_pretrained. For constrained devices, use an appropriate dtype, device_map, or quantization. Confirm that required packages are installed when ModuleNotFoundError appears [huggingface | model_loading.txt | chunk_001]
+- 2. Install transformers from the main branch [llamafactory | README.md | chunk_065]
 
 ### Example
 
 ```python
-from transformers import AutoModelForCausalLM
-model = AutoModelForCausalLM.from_pretrained(name, device_map="auto")
+git clone -b main https://github.com/huggingface/transformers.git
+
+cd transformers
+
+pip install .
 ```
-[huggingface | model_loading.txt | chunk_002]
+[llamafactory | README.md | chunk_066]
 
 ### Verification
 
@@ -100,18 +102,16 @@ Quality: `1.00`
 For: `How should I configure LLaMAFactory for a small GPU?`
 
 ### Recommended approach
-- LLaMAFactory Training LLaMAFactory supports supervised fine-tuning and parameter-efficient methods such as LoRA. For limited GPU memory, reduce per-device batch size, use gradient accumulation, bf16 or fp16, and a shorter cutoff length [llamafactory | training.md | chunk_001]
+- Verify GPU Access After installation, verify that Docker can access your GPU: [llamafactory | README.md | chunk_010]
 - HuggingFace Tokenizers AutoTokenizer loads the tokenizer associated with a pretrained model. Configure padding and truncation explicitly, and inspect input_ids and attention_mask before model inference [huggingface | tokenizers.md | chunk_001]
+- If successful, you should see your GPU information displayed [llamafactory | README.md | chunk_012]
 
 ### Example
 
 ```python
-per_device_train_batch_size: 1
-gradient_accumulation_steps: 8
-cutoff_len: 1024
-bf16: true
+llamafactory-cli webui
 ```
-[llamafactory | training.md | chunk_002]
+[llamafactory | README.md | chunk_073]
 
 ### Verification
 

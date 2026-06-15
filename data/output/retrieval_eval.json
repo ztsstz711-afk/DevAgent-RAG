@@ -6,9 +6,11 @@
       "effective_mode": "tfidf",
       "retriever_backend": "sklearn_tfidf",
       "fallback_reason": null,
-      "hit_at_1": 1.0,
-      "hit_at_3": 1.0,
-      "retrieval_non_empty_rate": 0.867,
+      "hit_at_1": 0.923,
+      "hit_at_3": 0.923,
+      "retrieval_non_empty_rate": 0.933,
+      "valid_evidence_hit_rate": 0.923,
+      "unsupported_refusal_rate": 1.0,
       "details": [
         {
           "question": "How do I create OpenAI embeddings?",
@@ -18,7 +20,10 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How to handle OpenAI rate limits?",
@@ -28,7 +33,10 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do OpenAI structured outputs enforce a schema?",
@@ -38,17 +46,23 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How does a LangChain retriever work?",
           "expected_product": "langchain",
           "top_products": [
             "langchain",
-            "langchain",
+            "llamafactory",
             "langchain"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I use LangChain tool calling?",
@@ -56,9 +70,12 @@
           "top_products": [
             "langchain",
             "langchain",
-            "langchain"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How should I configure a PyTorch DataLoader?",
@@ -66,9 +83,12 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "huggingface"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "PyTorch CUDA out of memory",
@@ -76,9 +96,12 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "pytorch"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I load a HuggingFace tokenizer?",
@@ -88,7 +111,10 @@
             "huggingface",
             "huggingface"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I start the vLLM OpenAI server?",
@@ -98,7 +124,10 @@
             "vllm",
             "vllm"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "What is the LLaMAFactory LoRA SFT dataset format?",
@@ -108,16 +137,23 @@
             "llamafactory",
             "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "ModuleNotFoundError: No module named transformers",
           "expected_product": "huggingface",
           "top_products": [
-            "huggingface",
-            "huggingface"
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "OPENAI_API_KEY missing",
@@ -126,39 +162,64 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "RuntimeError: dtype mismatch",
           "expected_product": "pytorch",
           "top_products": [
             "pytorch",
-            "pytorch"
+            "pytorch",
+            "huggingface"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How to deploy Kubernetes on AWS?",
           "expected_product": null,
-          "top_products": [],
-          "non_empty": false
+          "top_products": [
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
+          ],
+          "non_empty": true,
+          "valid_evidence": false,
+          "evidence_issues": [
+            "no_evidence",
+            "out_of_domain"
+          ],
+          "unsupported_refusal": true
         },
         {
           "question": "How to price an insurance product?",
           "expected_product": null,
           "top_products": [],
-          "non_empty": false
+          "non_empty": false,
+          "valid_evidence": false,
+          "evidence_issues": [
+            "no_evidence",
+            "out_of_domain"
+          ],
+          "unsupported_refusal": true
         }
       ]
     },
     "embedding": {
       "requested_mode": "embedding",
-      "effective_mode": "embedding",
-      "retriever_backend": "sentence_transformers",
-      "fallback_reason": null,
-      "hit_at_1": 1.0,
-      "hit_at_3": 1.0,
-      "retrieval_non_empty_rate": 1.0,
+      "effective_mode": "tfidf",
+      "retriever_backend": "sklearn_tfidf_fallback",
+      "fallback_reason": "test embedding unavailable",
+      "hit_at_1": 0.923,
+      "hit_at_3": 0.923,
+      "retrieval_non_empty_rate": 0.933,
+      "valid_evidence_hit_rate": 0.923,
+      "unsupported_refusal_rate": 1.0,
       "details": [
         {
           "question": "How do I create OpenAI embeddings?",
@@ -166,9 +227,12 @@
           "top_products": [
             "openai",
             "openai",
-            "vllm"
+            "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How to handle OpenAI rate limits?",
@@ -178,7 +242,10 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do OpenAI structured outputs enforce a schema?",
@@ -188,17 +255,23 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How does a LangChain retriever work?",
           "expected_product": "langchain",
           "top_products": [
             "langchain",
-            "langchain",
+            "llamafactory",
             "langchain"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I use LangChain tool calling?",
@@ -206,9 +279,12 @@
           "top_products": [
             "langchain",
             "langchain",
-            "langchain"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How should I configure a PyTorch DataLoader?",
@@ -216,9 +292,12 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "pytorch"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "PyTorch CUDA out of memory",
@@ -226,9 +305,12 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "pytorch"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I load a HuggingFace tokenizer?",
@@ -238,7 +320,10 @@
             "huggingface",
             "huggingface"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I start the vLLM OpenAI server?",
@@ -248,7 +333,10 @@
             "vllm",
             "vllm"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "What is the LLaMAFactory LoRA SFT dataset format?",
@@ -258,27 +346,35 @@
             "llamafactory",
             "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "ModuleNotFoundError: No module named transformers",
           "expected_product": "huggingface",
           "top_products": [
-            "huggingface",
-            "pytorch",
-            "pytorch"
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "OPENAI_API_KEY missing",
           "expected_product": "openai",
           "top_products": [
             "openai",
-            "openai",
-            "vllm"
+            "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "RuntimeError: dtype mismatch",
@@ -286,40 +382,53 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "pytorch"
+            "huggingface"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How to deploy Kubernetes on AWS?",
           "expected_product": null,
           "top_products": [
-            "openai",
-            "openai",
-            "vllm"
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": false,
+          "evidence_issues": [
+            "no_evidence",
+            "out_of_domain"
+          ],
+          "unsupported_refusal": true
         },
         {
           "question": "How to price an insurance product?",
           "expected_product": null,
-          "top_products": [
-            "openai",
-            "openai",
-            "openai"
+          "top_products": [],
+          "non_empty": false,
+          "valid_evidence": false,
+          "evidence_issues": [
+            "no_evidence",
+            "out_of_domain"
           ],
-          "non_empty": true
+          "unsupported_refusal": true
         }
       ]
     },
     "hybrid": {
       "requested_mode": "hybrid",
-      "effective_mode": "hybrid",
-      "retriever_backend": "hybrid_tfidf_embedding",
-      "fallback_reason": null,
-      "hit_at_1": 1.0,
-      "hit_at_3": 1.0,
-      "retrieval_non_empty_rate": 1.0,
+      "effective_mode": "tfidf",
+      "retriever_backend": "sklearn_tfidf_fallback",
+      "fallback_reason": "test embedding unavailable",
+      "hit_at_1": 0.923,
+      "hit_at_3": 0.923,
+      "retrieval_non_empty_rate": 0.933,
+      "valid_evidence_hit_rate": 0.923,
+      "unsupported_refusal_rate": 1.0,
       "details": [
         {
           "question": "How do I create OpenAI embeddings?",
@@ -327,9 +436,12 @@
           "top_products": [
             "openai",
             "openai",
-            "vllm"
+            "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How to handle OpenAI rate limits?",
@@ -339,7 +451,10 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do OpenAI structured outputs enforce a schema?",
@@ -349,17 +464,23 @@
             "openai",
             "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How does a LangChain retriever work?",
           "expected_product": "langchain",
           "top_products": [
             "langchain",
-            "langchain",
+            "llamafactory",
             "langchain"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I use LangChain tool calling?",
@@ -367,9 +488,12 @@
           "top_products": [
             "langchain",
             "langchain",
-            "langchain"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How should I configure a PyTorch DataLoader?",
@@ -377,9 +501,12 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "pytorch"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "PyTorch CUDA out of memory",
@@ -387,9 +514,12 @@
           "top_products": [
             "pytorch",
             "pytorch",
-            "pytorch"
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I load a HuggingFace tokenizer?",
@@ -399,7 +529,10 @@
             "huggingface",
             "huggingface"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How do I start the vLLM OpenAI server?",
@@ -409,7 +542,10 @@
             "vllm",
             "vllm"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "What is the LLaMAFactory LoRA SFT dataset format?",
@@ -419,27 +555,35 @@
             "llamafactory",
             "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "ModuleNotFoundError: No module named transformers",
           "expected_product": "huggingface",
           "top_products": [
-            "huggingface",
-            "huggingface",
-            "pytorch"
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "OPENAI_API_KEY missing",
           "expected_product": "openai",
           "top_products": [
             "openai",
-            "openai",
-            "vllm"
+            "openai"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "RuntimeError: dtype mismatch",
@@ -449,27 +593,38 @@
             "pytorch",
             "huggingface"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": true,
+          "evidence_issues": [],
+          "unsupported_refusal": false
         },
         {
           "question": "How to deploy Kubernetes on AWS?",
           "expected_product": null,
           "top_products": [
-            "vllm",
-            "vllm",
-            "vllm"
+            "llamafactory",
+            "llamafactory",
+            "llamafactory"
           ],
-          "non_empty": true
+          "non_empty": true,
+          "valid_evidence": false,
+          "evidence_issues": [
+            "no_evidence",
+            "out_of_domain"
+          ],
+          "unsupported_refusal": true
         },
         {
           "question": "How to price an insurance product?",
           "expected_product": null,
-          "top_products": [
-            "vllm",
-            "vllm",
-            "vllm"
+          "top_products": [],
+          "non_empty": false,
+          "valid_evidence": false,
+          "evidence_issues": [
+            "no_evidence",
+            "out_of_domain"
           ],
-          "non_empty": true
+          "unsupported_refusal": true
         }
       ]
     }
