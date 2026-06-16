@@ -7,7 +7,9 @@ class AgentState(TypedDict, total=False):
     question: str
     route: str
     error_info: dict[str, Any]
+    query_rewrite_info: dict[str, Any]
     documents: list[dict[str, Any]]
+    reranker_info: dict[str, Any]
     evidence_assessment: dict[str, Any]
     valid_documents: list[dict[str, Any]]
     code_snippets: list[dict[str, Any]]

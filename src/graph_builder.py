@@ -10,6 +10,8 @@ except ImportError:  # The real LangGraph path is used whenever dependencies are
 from .agent_state import AgentState
 from .evidence_gate import assess_evidence
 from .llm_answer import LLMAnswerGenerator
+from .query_rewriter import QueryRewriter
+from .reranker import LexicalReranker
 from .tools import code_snippet_finder_tool, doc_search_tool, error_parser_tool, quality_check_tool
 
 
@@ -20,10 +22,43 @@ def _trace(state: AgentState, tool: str, output: object) -> list[dict]:
 def build_graph(retriever, config: dict | None = None):
     config = config or {}
     retrieval = config.get("retrieval", {})
+    query_rewrite_config = config.get("query_rewrite", {})
+    reranker_config = config.get("reranker", {})
     quality = config.get("quality", {})
     llm_config = config.get("llm_answer", {})
     answer_mode = llm_config.get("mode", "template") if llm_config.get("enabled", False) else "template"
     answer_generator = LLMAnswerGenerator(mode=answer_mode, config=llm_config)
+    query_rewriter = QueryRewriter() if query_rewrite_config.get("enabled", False) else None
+    reranker = LexicalReranker() if reranker_config.get("enabled", False) else None
+
+    def maybe_rewrite_query(state: AgentState) -> tuple[str, dict | None]:
+        if query_rewriter is None:
+            return state["question"], None
+
+        rewritten = query_rewriter.rewrite(
+            state["question"],
+            route=state.get("route"),
+            error_info=state.get("error_info"),
+        )
+        info = {
+            "query_rewrite_enabled": True,
+            "query_rewrite_mode": query_rewrite_config.get("mode", "rule_based"),
+            **rewritten,
+        }
+        return rewritten["search_query"], info
+
+    def maybe_rerank(query: str, documents: list[dict]) -> tuple[list[dict], dict | None]:
+        if reranker is None:
+            return documents, None
+
+        reranked = reranker.rerank(query, documents, top_k=reranker_config.get("top_k"))
+        info = {
+            "reranker_enabled": True,
+            "reranker_mode": reranker_config.get("mode", "lexical"),
+            "original_retrieved_count": len(documents),
+            "reranked_count": len(reranked),
+        }
+        return reranked, info
 
     def route_task(state: AgentState) -> dict:
         parsed = error_parser_tool(state["question"])
@@ -35,22 +70,32 @@ def build_graph(retriever, config: dict | None = None):
         return {"error_info": result, "tool_trace": _trace(state, "error_parser_tool", result)}
 
     def retrieve_docs(state: AgentState) -> dict:
+        search_query, query_rewrite_info = maybe_rewrite_query(state)
         result = doc_search_tool(
-            state["question"], retriever,
+            search_query, retriever,
             top_k=retrieval.get("top_k", 4), min_score=retrieval.get("min_score", 0.01),
         )
+        result, reranker_info = maybe_rerank(search_query, result)
         assessment = assess_evidence(
             state["question"], result, min_score=float(retrieval.get("min_score", 0.05))
         )
         compact = [{"citation": f"{x['product']}/{x['source']}/{x['chunk_id']}", "score": x["score"]} for x in result]
-        return {
+        trace_output = {"results": compact, "evidence_assessment": assessment}
+        if query_rewrite_info is not None:
+            trace_output.update(query_rewrite_info)
+        if reranker_info is not None:
+            trace_output.update(reranker_info)
+        update = {
             "documents": result,
             "valid_documents": result if assessment["valid"] else [],
             "evidence_assessment": assessment,
-            "tool_trace": _trace(
-                state, "doc_search_tool", {"results": compact, "evidence_assessment": assessment}
-            ),
+            "tool_trace": _trace(state, "doc_search_tool", trace_output),
         }
+        if query_rewrite_info is not None:
+            update["query_rewrite_info"] = query_rewrite_info
+        if reranker_info is not None:
+            update["reranker_info"] = reranker_info
+        return update
 
     def find_code_snippets(state: AgentState) -> dict:
         preferred_sources = [item["source"] for item in state.get("valid_documents", [])]

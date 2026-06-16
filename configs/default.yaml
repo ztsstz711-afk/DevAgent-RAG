@@ -8,6 +8,13 @@ retrieval:
   min_score: 0.05
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
   hybrid_alpha: 0.5
+reranker:
+  enabled: false
+  mode: lexical
+  top_k: 3
+query_rewrite:
+  enabled: false
+  mode: rule_based
 chunking:
   max_chars: 1200
   overlap: 120
