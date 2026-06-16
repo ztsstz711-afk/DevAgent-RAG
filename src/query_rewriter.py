@@ -1,8 +1,7 @@
 """Rule-based query rewriting and keyword extraction.
 
-The rewriter is intentionally lightweight and dependency-free. It is not wired
-into the main RAG graph yet; callers can use its structured output to inspect or
-later improve retrieval queries.
+The rewriter is intentionally lightweight and dependency-free. QueryRewriter is
+optionally used in the RAG graph when query_rewrite.enabled is true.
 """
 
 from __future__ import annotations

@@ -1,8 +1,8 @@
 """Lightweight optional lexical reranker.
 
-This module is intentionally dependency-free and is not wired into the main
-RAG flow yet. It can rerank retriever-style document dictionaries while
-preserving their original fields.
+This module is intentionally dependency-free. LexicalReranker is optionally used
+after retrieval when reranker.enabled is true, while preserving original document
+fields.
 """
 
 from __future__ import annotations
@@ -112,4 +112,3 @@ class LexicalReranker:
 def rerank(query: str, documents: Sequence[Document], top_k: Optional[int] = None) -> List[Document]:
     """Convenience wrapper using the default lexical reranker."""
     return LexicalReranker().rerank(query, documents, top_k=top_k)
-
