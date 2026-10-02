@@ -1,280 +1,92 @@
 # DevAgent-RAG
 
-Local Agentic RAG pipeline for AI developer documentation and error-log diagnostics.
+面向 AI 开发文档与错误诊断的本地 RAG 原型。项目重点不是“检索到内容就回答”，而是把**检索、来源检查、拒答与可追踪输出**拆开，让技术诊断过程可以复查。
 
-The project uses LangGraph to route questions, parse common error logs, retrieve local documentation chunks, apply evidence checks, and generate citation-backed answers. It runs offline by default with sample documents and TF-IDF retrieval. Optional components include sentence-transformers retrieval, hybrid retrieval, query rewrite, lexical reranking, Streamlit UI, and OpenAI-compatible answer generation.
+```text
+问题 / 错误日志
+  -> 路由与错误解析
+  -> 本地文档检索
+  -> Evidence Gate（来源不足则拒答）
+  -> 模板或可选 LLM 生成
+  -> 引用、质量检查与工具轨迹
+```
 
-## Project Overview
+## 项目解决的问题
 
-DevAgent-RAG accepts technical questions or error logs and searches documentation related to OpenAI, LangChain/LangGraph, PyTorch, HuggingFace, vLLM, and LLaMAFactory. The system keeps retrieval, error parsing, answer generation, quality checks, citations, and tool traces as explicit steps.
+开发文档问答很容易出现“关键词碰巧命中，就给出过度确定的建议”。DevAgent-RAG 将以下边界显式实现：
 
-The repository includes sample documents for offline runs. It can also import public documentation cloned manually into `external/`. A local validation run with LLaMA-Factory documentation produced:
+- 检索结果不等于证据；缺少来源时应拒答；
+- GitHub Issue 可以提供真实问题线索，但不能自动当作官方修复结论；
+- 对“保证修复”和缺少版本信息的版本特定命令，Evidence Gate 会阻止过度承诺；
+- 可选 embedding / hybrid / reranker 并不默认启用，更不会在 fallback 时冒充语义检索结果。
 
-- `46` documents
-- `487` chunks
-- `30` imported documents
-- `458` LLaMAFactory chunks
-
-These numbers describe one local corpus snapshot and should not be read as deployment scale.
-
-## Why This Exists
-
-AI development support questions often mix framework usage, API configuration, dependency issues, CUDA memory errors, and long traceback logs. A single retrieve-then-generate path can over-answer when a weakly related chunk happens to match a few words. This project keeps the routing, evidence checks, and refusal behavior visible and testable.
-
-The main engineering goals are:
-
-- Keep the RAG workflow explicit with LangGraph nodes.
-- Compare keyword, embedding, and hybrid retrieval locally.
-- Preserve source citations and tool traces for each answer.
-- Separate "retrieved something" from "retrieved valid evidence".
-- Keep the default path runnable without API keys.
-
-## Features
-
-- LangGraph workflow for task routing, retrieval, answer generation, and quality checks.
-- Display-level task types: `doc_qa`, `error_debug`, `code_lookup`, and `config_help`.
-- TF-IDF baseline, optional sentence-transformers retrieval, and hybrid retrieval.
-- Optional rule-based query rewrite and lexical reranker, both disabled by default.
-- Markdown, MDX, TXT, and Jupyter Notebook loading with heading/code-aware chunking.
-- External documentation import with metadata manifest and index statistics.
-- Error parsing for CUDA OOM, `ModuleNotFoundError`, missing API keys, and `RuntimeError`.
-- Evidence gate, domain guard, and no-evidence refusal.
-- Template answer generation plus optional OpenAI-compatible answer generation.
-- CLI scripts, Streamlit local console, evaluation reports, and JSONL tool trace.
-
-## Architecture
+## 架构
 
 ```mermaid
 flowchart LR
-    Q["Original query"] --> RW["optional query rewrite"]
-    RW --> D["retriever search"]
-    D --> RR["optional lexical reranker"]
-    RR --> G["evidence gate / domain guard"]
-    G --> C["find_code_snippets"]
-    C --> A["template or optional LLM answer"]
-    A --> QC["check_quality"]
-    QC --> O["answer + citations + tool trace"]
+    Q[问题或错误日志] --> R[路由 / 解析]
+    R --> T[TF-IDF 检索]
+    T --> E{Evidence Gate}
+    E -->|证据不足| X[拒答并说明边界]
+    E -->|证据通过| A[生成带引用回答]
+    A --> C[格式与质量检查]
+    C --> O[答案 + 引用 + 工具轨迹]
 ```
 
-Core flow:
+默认路径完全本地运行：TF-IDF、Evidence Gate、模板回答和测试均不要求 API key。配置 API 后，LLM 只在证据通过后参与最终回答生成。
 
-```text
-original query
-  -> optional query rewrite
-  -> retriever search
-  -> optional lexical reranker
-  -> evidence gate
-  -> answer generation
-  -> quality check
-```
+## 当前可复核状态
 
-LangGraph node flow:
+- 真实来源评测使用独立索引：仅含 5 份带 URL、抓取时间和 SHA-256 的官方文档快照（不混入演示或上传文档），以及 8 条冻结烟雾题。
+- 完整本地测试已通过 `82/82`。
+- 8 条自动化烟雾题只验证“检索/拒答行为符合预设规则”，不是准确率或泛化率。在安装 requirements 并重建独立 sklearn TF-IDF 索引后，基线为 Hit@1 `5/5`、Hit@3 `5/5`、MRR `1.000`，且 3 条拒答探针全部通过；同一候选集上的 lexical reranker 没有测得额外收益，因此不默认启用。
+- 双人来源蕴含审核包已准备，但尚未填写；在人工审核与分歧裁决完成前，不宣称引用内容已经被人工确认支持回答。
 
-```text
-route_task -> parse_error / retrieve_docs -> evidence gate
-           -> find_code_snippets -> generate_answer -> check_quality
-```
+## 快速开始
 
-OpenAI-compatible APIs are only used in the final answer generation step when explicitly enabled. Retrieval and evidence checks run locally.
-
-## Quick Start
-
-```bash
+```powershell
 python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python scripts/prepare_sample_docs.py
-python scripts/build_index.py
+python scripts\prepare_sample_docs.py
+python scripts\build_index.py
+python -m unittest discover -s tests
 ```
 
-Windows PowerShell:
+复核真实来源快照与上述小型检索对照：
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
+python scripts\fetch_curated_official_docs_v7.py
+python scripts\build_index.py --config configs\real_source_eval_v7.yaml
+python scripts\verify_real_source_manifest_v7.py
+python scripts\real_source_eval_v7.py
+python scripts\real_source_eval_v7.py --config configs\real_source_eval_v7_lexical_rerank.yaml --output-stem real_source_eval_v7_lexical_rerank
 ```
 
-## Run Tests
+运行本地示例：
 
-```bash
-python -m unittest discover -s tests -v
+```powershell
+python scripts\ask.py "How should I handle OpenAI API rate limits?"
+python scripts\debug.py "CUDA out of memory"
 ```
 
-The tests cover document loading, chunking, retrieval backends, graph routing, evidence checks, query rewrite, reranking, external import, LLM fallback, Streamlit utilities, and report generation.
-
-## Run Demo
-
-```bash
-python scripts/run_demo.py
-python scripts/debug.py "CUDA out of memory"
-python scripts/ask.py "How to handle OpenAI rate limits?"
-python scripts/evaluate.py
-python scripts/retrieval_eval.py
-```
-
-For a suggested local walkthrough, see [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
-
-## Streamlit Local Console
-
-```bash
-streamlit run app.py
-```
-
-The Streamlit console supports:
-
-- Uploading `.md`, `.mdx`, `.txt`, and `.ipynb` files.
-- Importing GitHub documentation repositories into the local corpus.
-- Rebuilding the index.
-- Selecting retrieval mode, top-k, and answer mode.
-- Inspecting task type, answer backend, quality report, citations, chunks, and tool trace.
-- Running and previewing evaluation reports.
-
-The UI is a local console over the same `src/` and `scripts/` code paths. It does not include multi-user auth, access control, or hosted service controls.
-
-## External Docs Import
-
-Sample docs work offline. For public documentation imports, clone repositories manually into `external/`:
-
-```bash
-git clone https://github.com/openai/openai-cookbook external/openai-cookbook
-git clone https://github.com/langchain-ai/docs external/langchain-docs
-git clone https://github.com/pytorch/tutorials external/pytorch-tutorials
-git clone https://github.com/hiyouga/LLaMA-Factory external/llamafactory
-
-python scripts/prepare_external_docs.py
-python scripts/build_index.py
-```
-
-The importer limits file types, file size, and per-source document counts. It skips `.git`, assets, build outputs, virtual environments, and similar directories. `external/`, `data/docs_imported/`, and `data/index/` are ignored by Git.
-
-## Retrieval Modes
-
-Configuration lives in `configs/default.yaml`:
-
-```yaml
-retrieval:
-  mode: tfidf
-  top_k: 3
-  min_score: 0.05
-  embedding_model: sentence-transformers/all-MiniLM-L6-v2
-  hybrid_alpha: 0.5
-```
-
-| Mode | Description | Notes |
-|---|---|---|
-| `tfidf` | sklearn TF-IDF baseline | Default path; works well for exact keywords, error names, and config terms |
-| `embedding` | sentence-transformers + NumPy cosine similarity | Optional semantic retrieval; requires the model to be available locally or downloadable |
-| `hybrid` | Min-max normalization plus weighted score fusion | Combines TF-IDF and embedding scores |
-
-If the embedding model is unavailable, embedding/hybrid modes can fall back to TF-IDF with a clear reason.
-
-## Optional Retrieval Enhancements
-
-Query rewrite and lexical reranking are disabled by default:
-
-```yaml
-query_rewrite:
-  enabled: false
-  mode: rule_based
-
-reranker:
-  enabled: false
-  mode: lexical
-  top_k: 3
-```
-
-When enabled:
-
-- Query rewrite compresses long tracebacks or noisy error logs into a shorter `search_query`.
-- Lexical reranker reorders initial top-k candidates using keyword overlap, error-type matches, and the original retrieval score.
-- `query_rewrite_info` and `reranker_info` are written into state/tool trace for debugging and retrieval-chain inspection.
-- Evidence gate, domain guard, and no-evidence refusal still run after retrieval.
-
-These modules do not call an LLM, download models, or replace the evidence checks.
-
-## Optional LLM Answer
-
-The API path is optional. Without `OPENAI_API_KEY`, tests, demos, evaluation scripts, and the Streamlit console use template answers.
-
-```bash
-python scripts/check_llm_config.py
-python scripts/run_llm_demo.py
-```
-
-Environment variables:
+## 代码结构
 
 ```text
-OPENAI_API_KEY
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4o-mini
+src/       路由、检索、Evidence Gate、生成与质量检查
+scripts/   索引、真实来源校验、评测与本地演示
+tests/     不调用真实 API 的单元与集成测试
+data/      示例文档、索引与本地评测产物（大文件/抓取内容不上传）
+configs/   默认检索与运行配置
 ```
 
-The LLM answer path receives only evidence that passed the evidence gate. If evidence is insufficient, the system refuses instead of calling the API. See [API_USAGE.md](docs/API_USAGE.md).
+## 公开展示边界
 
-## Evaluation
+GitHub 只保留最终代码、最终说明和可复核摘要。原始抓取文本、缓存、工具轨迹、未填写的人审表及过程性审计不作为公开展示内容。
 
-```bash
-python scripts/evaluate.py
-python scripts/retrieval_eval.py
-```
+## 非目标
 
-Evaluation scripts are included for routing accuracy, retrieval quality, citation coverage, evidence gating, and tool execution checks.
-
-The latest generated reports are stored under `data/output/`:
-
-- [eval_report.md](data/output/eval_report.md)
-- [retrieval_eval.md](data/output/retrieval_eval.md)
-- [demo_results.md](data/output/demo_results.md)
-- `data/output/tool_trace.jsonl`
-- `data/output/index_stats.json`
-
-Metrics in the README are not treated as fixed claims. Check the generated reports after rerunning the evaluation scripts, especially when optional retrieval modes or local model availability change.
-
-The built-in evaluation uses a small fixed set of sample cases. It is useful for regression checks, but it is not a substitute for evaluation on a larger real-world corpus.
-
-## Verify Retrieval Enhancements
-
-These scripts compare optional retrieval enhancement behavior without changing the default config:
-
-```powershell
-.venv\Scripts\python.exe scripts/verify_reranker.py
-.venv\Scripts\python.exe scripts/verify_query_rewrite_reranker.py
-```
-
-They compare disabled/enabled settings, inspect `query_rewrite_info` and `reranker_info`, and confirm unsupported queries still go through no-evidence refusal.
-
-## Design Notes
-
-- Query rewrite is useful when long tracebacks dilute the key retrieval terms.
-- Lexical reranking is useful when initial top-k results contain weakly related chunks.
-- Both are disabled by default because they change the retrieval path and should be evaluated for a given corpus.
-- Evidence gating remains necessary because retrieval ranking alone does not prove that the answer is supported.
-- The default flow can be checked with `unittest`, `evaluate.py`, and `retrieval_eval.py`; optional retrieval behavior can be checked with the verification scripts above.
-
-## Development Notes
-
-The project started as a small LangGraph + TF-IDF pipeline and added no-evidence refusal, optional LLM answers, embedding/hybrid retrieval, external document import, Streamlit UI, evidence gating, query rewrite, and lexical reranking over time. See [PROJECT_STAGES.md](docs/PROJECT_STAGES.md) for a compact development history.
-
-## Limitations
-
-- This is a local pipeline, not a hosted knowledge service.
-- External docs and evaluation cases are limited and do not cover all real user distributions.
-- Router, error parser, query rewrite, and reranker are rule-based and have limited coverage.
-- Evidence gate uses keyword categories and thresholds, so false refusals and missed refusals are possible.
-- Hybrid weights, retrieval thresholds, and reranker weights have not been tuned on a large labeled dataset.
-- LLM output does not yet have strict citation-entailment verification.
-
-## Future Work
-
-- Tune retrieval thresholds, hybrid weights, and reranker weights on a larger labeled set.
-- Add citation entailment checks.
-- Improve incremental indexing, document versioning, and embedding cache behavior.
-- Add stronger observability and performance checks.
-- Compare rule-based routing with classifier-based routing under the same evaluation set.
-
-## Repository Artifacts
-
-- [API configuration](docs/API_USAGE.md)
-- [Demo script](docs/DEMO_SCRIPT.md)
-- [Development notes](docs/PROJECT_STAGES.md)
-- [Evaluation report](data/output/eval_report.md)
-- [Retrieval evaluation report](data/output/retrieval_eval.md)
-- [Demo results](data/output/demo_results.md)
+- 不是托管知识库或生产客服系统；
+- 不把 TF-IDF fallback 描述成 embedding/hybrid 的效果；
+- 不在没有真实失败证据时叠加多 Agent、MCP 或复杂 UI；
+- 不把自动化烟雾测试表述为真实开发问题上的泛化能力。

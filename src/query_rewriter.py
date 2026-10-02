@@ -30,6 +30,15 @@ ERROR_TYPE_ALIASES = {
     "openai_api_key_missing": "OPENAI_API_KEY missing",
     "runtime_error": "RuntimeError",
 }
+DOCUMENTATION_QUERY_HINTS = (
+    (("retry-after",), ("retry-after", "seconds", "retry", "rate limit"), "rate_limit_retry_after"),
+    (("resent continuously", "resend continuously", "unsuccessful requests"), ("unsuccessful requests", "per-minute limit", "retry-after"), "rate_limit_resend_guard"),
+    (("pin_memory", "pin memory"), ("pin_memory", "pinned memory", "cuda"), "pytorch_pin_memory"),
+    (("raw hidden states", "task head"), ("raw hidden states", "appropriate model head", "pretrained model"), "transformers_task_head"),
+    # The rate-limit guide describes the practical recovery procedure under
+    # these terms, which are absent from many natural-language user questions.
+    (("rate limit", "rate limits", "429"), ("retry-after", "exponential backoff", "jitter"), "rate_limit_recovery"),
+)
 
 
 class QueryRewriter:
@@ -48,7 +57,7 @@ class QueryRewriter:
                 normalized_query, error_type, module_name, libraries, api_names
             )
         else:
-            search_query, reason = normalized_query, "none"
+            search_query, reason = self._rewrite_documentation_query(normalized_query)
 
         keywords = self._keywords(search_query, libraries, api_names, module_name, error_type)
         return {
@@ -62,6 +71,13 @@ class QueryRewriter:
             "rewrite_applied": search_query != normalized_query,
             "rewrite_reason": reason,
         }
+
+    def _rewrite_documentation_query(self, text: str) -> tuple[str, str]:
+        lowered = text.lower()
+        for triggers, hints, reason in DOCUMENTATION_QUERY_HINTS:
+            if any(trigger in lowered for trigger in triggers):
+                return self._join([text, *hints]), reason
+        return text, "none"
 
     def _extract_libraries(self, text: str) -> list[str]:
         lowered = text.lower()

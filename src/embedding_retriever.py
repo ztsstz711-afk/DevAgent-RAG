@@ -4,11 +4,14 @@ from pathlib import Path
 from typing import Any
 
 try:
-    import joblib
     import numpy as np
 except ImportError:  # Optional enhancement; TF-IDF remains available.
-    joblib = None
     np = None
+
+try:
+    import joblib
+except ImportError:  # Saving and loading embedding indexes is optional.
+    joblib = None
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -36,7 +39,7 @@ class EmbeddingRetriever:
 
     @classmethod
     def dependency_available(cls) -> bool:
-        return SentenceTransformer is not None and np is not None and joblib is not None
+        return SentenceTransformer is not None and np is not None
 
     def _ensure_model(self):
         if self.model is not None:

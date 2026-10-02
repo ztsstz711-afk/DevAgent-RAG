@@ -1,0 +1,39 @@
+paths:
+  # Deliberately absent: v7 uses only the reviewed imported documents below.
+  docs: data/real_source_eval_v7_no_sample_docs
+  index: data/index/real_source_eval_v7_tfidf_index.joblib
+  output: data/output/real_source_eval_v7
+retrieval:
+  mode: tfidf
+  top_k: 3
+  min_score: 0.05
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  hybrid_alpha: 0.5
+reranker:
+  enabled: false
+  mode: lexical
+  top_k: 3
+query_rewrite:
+  enabled: false
+  mode: rule_based
+chunking:
+  max_chars: 1200
+  overlap: 120
+quality:
+  min_citations: 1
+llm_answer:
+  enabled: false
+  mode: template
+  api_key_env: OPENAI_API_KEY
+  base_url_env: OPENAI_BASE_URL
+  model_env: OPENAI_MODEL
+external_docs:
+  enabled: true
+  external_dir: external
+  imported_docs_dir: data/docs_imported
+  max_external_docs_per_source: 30
+  max_file_size_kb: 512
+web:
+  # Deliberately absent: uploaded demo documents are outside the frozen evaluation.
+  uploaded_docs_dir: data/real_source_eval_v7_no_uploaded_docs
+  allow_github_clone: false

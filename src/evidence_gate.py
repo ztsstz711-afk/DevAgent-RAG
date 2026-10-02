@@ -23,6 +23,9 @@ STOPWORDS = {
     "this", "to", "use", "using", "what", "when", "where", "which", "with", "you",
 }
 MIN_KEYWORD_OVERLAP = 0.1
+HIGH_ASSURANCE_TERMS = {"guarantee", "guaranteed", "guaranteeing"}
+VERSION_SPECIFIC_TERMS = {"version-specific", "version-specificity"}
+VERSION_IDENTIFIER = re.compile(r"\b(?:v)?\d+\.\d+(?:\.\d+)?(?:[-+][a-z0-9.-]+)?\b", re.IGNORECASE)
 
 
 def _tokens(text: str) -> set[str]:
@@ -39,6 +42,9 @@ def assess_evidence(question: str, documents: list[dict], min_score: float = 0.0
     )
     supported_terms = sorted(query_tokens & SUPPORTED_TERMS)
     out_of_domain = bool(matched_out_of_domain and not supported_terms)
+    high_assurance_terms = sorted(query_tokens & HIGH_ASSURANCE_TERMS)
+    version_specific_terms = sorted(query_tokens & VERSION_SPECIFIC_TERMS)
+    has_version_identifier = bool(VERSION_IDENTIFIER.search(question))
 
     top_score = max((float(item.get("score", 0.0)) for item in documents), default=0.0)
     evidence_text = " ".join(
@@ -58,6 +64,15 @@ def assess_evidence(question: str, documents: list[dict], min_score: float = 0.0
         issues.append("no_evidence")
     if out_of_domain:
         issues.extend(["no_evidence", "out_of_domain"])
+    elif high_assurance_terms:
+        # Generic retrieval can support a troubleshooting discussion, but it
+        # cannot establish that a version-specific incident is guaranteed fixed.
+        # Hold that claim until there is a direct maintainer or release-note source.
+        issues.extend(["no_evidence", "unsupported_assurance_claim"])
+    elif version_specific_terms and not has_version_identifier:
+        # A version-specific fix cannot be grounded when the question itself
+        # omits the dependency/version constraint required to locate evidence.
+        issues.extend(["no_evidence", "missing_version_constraint"])
     elif documents and meaningful_query and overlap_ratio < MIN_KEYWORD_OVERLAP:
         issues.extend(["no_evidence", "low_keyword_overlap"])
 
@@ -71,5 +86,8 @@ def assess_evidence(question: str, documents: list[dict], min_score: float = 0.0
         "min_keyword_overlap": MIN_KEYWORD_OVERLAP,
         "overlap_tokens": overlap_tokens,
         "supported_terms": supported_terms,
+        "high_assurance_terms": high_assurance_terms,
+        "version_specific_terms": version_specific_terms,
+        "has_version_identifier": has_version_identifier,
         "out_of_domain_categories": matched_out_of_domain,
     }

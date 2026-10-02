@@ -33,6 +33,32 @@ class EvidenceGateTests(unittest.TestCase):
         self.assertIn("out_of_domain", assess_evidence("How to price an insurance product?", weak)["issues"])
         self.assertIn("out_of_domain", assess_evidence("What is the capital of France?", weak)["issues"])
 
+    def test_generic_document_cannot_support_a_guaranteed_incident_fix(self):
+        documents = [{
+            "content": "Use DataLoader with configurable workers and batch sizes.",
+            "product": "pytorch",
+            "source": "dataloader.md",
+            "score": 0.4,
+        }]
+        result = assess_evidence(
+            "Can you guarantee a fix for a Windows DataLoader memory issue?", documents
+        )
+        self.assertFalse(result["valid"])
+        self.assertIn("unsupported_assurance_claim", result["issues"])
+
+    def test_version_specific_fix_without_a_version_is_rejected(self):
+        documents = [{
+            "content": "A retriever returns documents relevant to a query.",
+            "product": "langchain",
+            "source": "retrieval.md",
+            "score": 0.4,
+        }]
+        result = assess_evidence(
+            "Can you give a version-specific LangChain retriever fix command?", documents
+        )
+        self.assertFalse(result["valid"])
+        self.assertIn("missing_version_constraint", result["issues"])
+
 
 if __name__ == "__main__":
     unittest.main()

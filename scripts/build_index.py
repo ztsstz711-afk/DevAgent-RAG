@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import argparse
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -68,12 +69,27 @@ def build_index(
 
 
 if __name__ == "__main__":
-    count, path = build_index()
-    stats = json.loads(project_path("data/output/index_stats.json").read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(description="Build a local retrieval index.")
+    parser.add_argument("--config", default="configs/default.yaml")
+    parser.add_argument("--docs-dir")
+    parser.add_argument("--imported-docs-dir")
+    parser.add_argument("--index-path")
+    parser.add_argument("--stats-path")
+    args = parser.parse_args()
+    count, path = build_index(
+        config_path=args.config,
+        docs_dir=args.docs_dir,
+        imported_docs_dir=args.imported_docs_dir,
+        index_path=args.index_path,
+        stats_path=args.stats_path,
+    )
+    config = load_config(args.config)
+    stats_path = project_path(args.stats_path or Path(config["paths"]["output"]) / "index_stats.json")
+    stats = json.loads(stats_path.read_text(encoding="utf-8"))
     print(f"Built TF-IDF index at {path}")
     print(f"total_documents: {stats['total_documents']}")
     print(f"total_chunks: {count}")
     print(f"sources: {', '.join(stats['sources'])}")
     print(f"chunks_per_source: {stats['chunks_per_source']}")
     print(f"imported_docs_count: {stats['imported_docs_count']}")
-    print(f"Stats: {project_path('data/output/index_stats.json')}")
+    print(f"Stats: {stats_path}")

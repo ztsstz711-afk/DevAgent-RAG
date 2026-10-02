@@ -14,3 +14,6 @@ external/
 data/docs_imported/
 data/docs_uploaded/
 data/index/
+data/output/*
+!data/output/.gitkeep
+data/evals/human_audit_v7/

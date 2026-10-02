@@ -1,0 +1,75 @@
+{
+  "dataset_id": "devagent_real_source_cases_v7",
+  "purpose": "Frozen real-source smoke evaluation. This is not a production benchmark.",
+  "construction": {
+    "official_document_cases": "Questions are authored from the listed official documentation pages and require retrieval of the frozen local snapshot.",
+    "issue_gap_cases": "Questions are minimal abstractions of public GitHub issues. The issue text is not imported; the expected behavior is refusal when direct maintainer, release-note, or version evidence is absent.",
+    "out_of_domain_case": "A manually authored negative control outside the local technical corpus."
+  },
+  "cases": [
+    {
+      "id": "OAI-RL-01",
+      "question": "How should I handle OpenAI API rate limit responses?",
+      "expected_source": "openai_rate_limits.txt",
+      "source_url": "https://developers.openai.com/api/docs/guides/rate-limits",
+      "source_type": "official_documentation",
+      "should_refuse": false
+    },
+    {
+      "id": "OAI-SO-01",
+      "question": "How do structured outputs constrain a response to a supplied JSON schema?",
+      "expected_source": "openai_structured_outputs.txt",
+      "source_url": "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "source_type": "official_documentation",
+      "should_refuse": false
+    },
+    {
+      "id": "PT-DL-01",
+      "question": "According to the PyTorch DataLoader documentation, what controls worker processes?",
+      "expected_source": "pytorch_data.txt",
+      "source_url": "https://docs.pytorch.org/docs/main/data.html",
+      "source_type": "official_documentation",
+      "should_refuse": false
+    },
+    {
+      "id": "LC-RET-01",
+      "question": "According to LangChain documentation, what does a retriever return for an unstructured query?",
+      "expected_source": "langchain_retrieval.txt",
+      "source_url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+      "source_type": "official_documentation",
+      "should_refuse": false
+    },
+    {
+      "id": "HF-QS-01",
+      "question": "According to the Transformers Quickstart, what does AutoClass infer when loading a pretrained model?",
+      "expected_source": "huggingface_transformers_quickstart.txt",
+      "source_url": "https://huggingface.co/docs/transformers/en/quicktour",
+      "source_type": "official_documentation",
+      "should_refuse": false
+    },
+    {
+      "id": "PT-ISSUE-GAP-01",
+      "question": "On Windows, a long-lived PyTorch DataLoader iterator keeps increasing memory. Can you guarantee a fix?",
+      "expected_source": null,
+      "source_url": "https://github.com/pytorch/pytorch/issues/166513",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    },
+    {
+      "id": "LC-ISSUE-GAP-01",
+      "question": "After an upgrade, importing a LangChain retriever fails. Can you give a version-specific fix command?",
+      "expected_source": null,
+      "source_url": "https://github.com/langchain-ai/langchain/issues/17860",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    },
+    {
+      "id": "OOD-INSURANCE-01",
+      "question": "How should I price an insurance product?",
+      "expected_source": null,
+      "source_url": null,
+      "source_type": "manual_negative_control",
+      "should_refuse": true
+    }
+  ]
+}

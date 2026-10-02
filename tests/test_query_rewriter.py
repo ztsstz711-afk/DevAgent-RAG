@@ -33,6 +33,14 @@ class QueryRewriterTests(unittest.TestCase):
         self.assertFalse(result["rewrite_applied"])
         self.assertEqual(result["rewrite_reason"], "none")
 
+    def test_rate_limit_question_adds_documented_recovery_terms(self):
+        result = self.rewriter.rewrite("How should I handle OpenAI API rate limit responses?")
+
+        self.assertTrue(result["rewrite_applied"])
+        self.assertEqual(result["rewrite_reason"], "rate_limit_recovery")
+        self.assertIn("retry-after", result["search_query"])
+        self.assertIn("exponential backoff", result["search_query"])
+
     def test_extracts_library_names(self):
         result = self.rewriter.rewrite("Use PyTorch, HuggingFace transformers, vLLM, and LLaMA-Factory")
 
