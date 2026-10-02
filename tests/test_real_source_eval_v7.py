@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from scripts.real_source_eval_v7 import _retrieval_metrics, load_cases
 from src.utils import load_config
@@ -13,6 +14,14 @@ class RealSourceEvalV7Tests(unittest.TestCase):
         self.assertTrue(any(case["source_type"] == "official_documentation" for case in cases))
         self.assertTrue(any(case["source_type"] == "public_issue_minimal_abstraction" for case in cases))
         self.assertTrue(any(case["source_type"] == "manual_negative_control" for case in cases))
+
+    def test_evaluator_accepts_an_explicit_issue_derived_dataset(self):
+        dataset, cases = load_cases(Path("data/evals/issue_derived_refusal_controls_v1.json"))
+
+        self.assertEqual(dataset["dataset_id"], "devagent_issue_derived_refusal_controls_v1")
+        self.assertEqual(len(cases), 5)
+        self.assertTrue(all(case["should_refuse"] for case in cases))
+        self.assertTrue(all(case["source_type"] == "public_issue_minimal_abstraction" for case in cases))
 
     def test_dedicated_evaluation_config_excludes_demo_document_paths(self):
         config = load_config("configs/real_source_eval_v7.yaml")

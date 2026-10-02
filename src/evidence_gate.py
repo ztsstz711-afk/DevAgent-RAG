@@ -23,7 +23,9 @@ STOPWORDS = {
     "this", "to", "use", "using", "what", "when", "where", "which", "with", "you",
 }
 MIN_KEYWORD_OVERLAP = 0.1
-HIGH_ASSURANCE_TERMS = {"guarantee", "guaranteed", "guaranteeing"}
+HIGH_ASSURANCE_TERMS = {
+    "guarantee", "guaranteed", "guaranteeing", "promise", "promised", "promising",
+}
 VERSION_SPECIFIC_TERMS = {"version-specific", "version-specificity"}
 VERSION_IDENTIFIER = re.compile(r"\b(?:v)?\d+\.\d+(?:\.\d+)?(?:[-+][a-z0-9.-]+)?\b", re.IGNORECASE)
 

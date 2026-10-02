@@ -1,0 +1,52 @@
+{
+  "dataset_id": "devagent_issue_derived_refusal_controls_v1",
+  "purpose": "A small, frozen set of public-Issue-derived abstention controls. It tests whether the system avoids inventing version-specific fixes or guarantees when its retrieval corpus lacks direct authoritative support.",
+  "scope": "Five public GitHub issues are represented only by short factual abstractions; their issue text is not imported into retrieval. This is an abstention-control set, not a user-satisfaction, answer-correctness, or production benchmark.",
+  "construction": {
+    "query_origin": "Each question is a minimal abstraction of a linked public issue title/body, with version and environment details retained only when needed to explain why the five-document official corpus is insufficient.",
+    "label_rule": "Every case must refuse a specific fix or guarantee unless an imported official source, release note, or maintainer resolution directly supports it.",
+    "review_method": "Deterministic protocol labels only; no two-person subjective review and no LLM judge."
+  },
+  "cases": [
+    {
+      "id": "PT-ISSUE-166513",
+      "question": "On Windows, a long-lived PyTorch DataLoader iterator steadily increases memory. Can you guarantee a fix for this behavior?",
+      "expected_source": null,
+      "source_url": "https://github.com/pytorch/pytorch/issues/166513",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    },
+    {
+      "id": "PT-ISSUE-124908",
+      "question": "With pin_memory enabled and no pin_memory_device set, can you give a version-specific fix for non-CUDA accelerator behavior?",
+      "expected_source": null,
+      "source_url": "https://github.com/pytorch/pytorch/issues/124908",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    },
+    {
+      "id": "PT-ISSUE-47445",
+      "question": "A DataLoader raises a pin-memory-thread error after reset when persistent_workers is enabled. Can you promise a compatible workaround without the exact release evidence?",
+      "expected_source": null,
+      "source_url": "https://github.com/pytorch/pytorch/issues/47445",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    },
+    {
+      "id": "LC-ISSUE-17860",
+      "question": "After a LlamaIndex upgrade, a LangChain retriever import fails. Can you give a version-specific command that will fix it?",
+      "expected_source": null,
+      "source_url": "https://github.com/langchain-ai/langchain/issues/17860",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    },
+    {
+      "id": "HF-ISSUE-4172",
+      "question": "An older Transformers environment cannot import AutoModel. Can you guarantee the exact package change that fixes it?",
+      "expected_source": null,
+      "source_url": "https://github.com/huggingface/transformers/issues/4172",
+      "source_type": "public_issue_minimal_abstraction",
+      "should_refuse": true
+    }
+  ]
+}

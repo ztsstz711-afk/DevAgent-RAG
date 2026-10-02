@@ -46,6 +46,19 @@ class EvidenceGateTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("unsupported_assurance_claim", result["issues"])
 
+    def test_generic_document_cannot_support_a_promised_incident_workaround(self):
+        documents = [{
+            "content": "Use DataLoader with configurable workers and batch sizes.",
+            "product": "pytorch",
+            "source": "dataloader.md",
+            "score": 0.4,
+        }]
+        result = assess_evidence(
+            "Can you promise a compatible workaround for this DataLoader incident?", documents
+        )
+        self.assertFalse(result["valid"])
+        self.assertIn("unsupported_assurance_claim", result["issues"])
+
     def test_version_specific_fix_without_a_version_is_rejected(self):
         documents = [{
             "content": "A retriever returns documents relevant to a query.",

@@ -21,11 +21,11 @@ from src.utils import project_path, write_json
 CASES_PATH = ROOT / "data" / "evals" / "real_source_cases_v7.json"
 
 
-def load_cases() -> tuple[dict, list[dict]]:
-    dataset = json.loads(CASES_PATH.read_text(encoding="utf-8"))
+def load_cases(cases_path: Path = CASES_PATH) -> tuple[dict, list[dict]]:
+    dataset = json.loads(cases_path.read_text(encoding="utf-8"))
     cases = dataset.get("cases", [])
     if not cases:
-        raise ValueError(f"No cases found in {CASES_PATH}")
+        raise ValueError(f"No cases found in {cases_path}")
     required = {"id", "question", "expected_source", "source_url", "source_type", "should_refuse"}
     for case in cases:
         missing = sorted(required - set(case))
@@ -65,7 +65,7 @@ def _write_markdown(report: dict, output_stem: str) -> Path:
         f"- Overall pass rate: {report['pass_rate']:.1%} ({report['passed_cases']}/{report['total_cases']})",
         f"- Expected-source Hit@1: {retrieval['hit_at_1']}/{retrieval['expected_source_cases']}",
         f"- Expected-source Hit@3: {retrieval['hit_at_3']}/{retrieval['expected_source_cases']}",
-        f"- Expected-source MRR: {retrieval['mrr']:.3f}",
+        f"- Expected-source MRR: {retrieval['mrr']:.3f}" if retrieval["mrr"] is not None else "- Expected-source MRR: n/a (no source-retrieval cases)",
         "",
         "| ID | Expected behavior | Result | Expected-source rank | Evidence status | Retrieved sources |",
         "|---|---|---:|---:|---|---|",
@@ -87,8 +87,9 @@ def _write_markdown(report: dict, output_stem: str) -> Path:
 def evaluate(
     config_path: str = "configs/real_source_eval_v7.yaml",
     output_stem: str = "real_source_eval_v7",
+    cases_path: Path = CASES_PATH,
 ) -> dict:
-    dataset, cases = load_cases()
+    dataset, cases = load_cases(cases_path)
     pipeline = RAGPipeline(config_path=config_path)
     details = []
     for case in cases:
@@ -128,9 +129,9 @@ def evaluate(
     report = {
         "evaluation_type": "frozen_real_source_smoke_test",
         "dataset_id": dataset["dataset_id"],
-        "dataset_path": str(CASES_PATH.relative_to(ROOT)).replace("\\", "/"),
+        "dataset_path": str(cases_path.resolve().relative_to(ROOT)).replace("\\", "/"),
         "config_path": config_path.replace("\\", "/"),
-        "scope": "Five official documents (OpenAI, PyTorch, LangChain, and Hugging Face) plus three refusal probes; no GitHub issue text was imported.",
+        "scope": dataset.get("scope", "Dataset-defined source and evaluation scope."),
         "graph_backend": pipeline.graph_backend,
         "retrieval_mode": pipeline.retrieval_mode,
         "retriever_backend": pipeline.retriever_backend,
@@ -149,15 +150,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/real_source_eval_v7.yaml")
     parser.add_argument("--output-stem", default="real_source_eval_v7")
+    parser.add_argument("--cases", type=Path, default=CASES_PATH)
     args = parser.parse_args()
-    report = evaluate(config_path=args.config, output_stem=args.output_stem)
+    report = evaluate(config_path=args.config, output_stem=args.output_stem, cases_path=args.cases)
     retrieval = report["retrieval_metrics"]
     print(f"Real-source smoke pass rate: {report['pass_rate']:.1%} ({report['passed_cases']}/{report['total_cases']})")
     print(
         "Expected-source retrieval: "
         f"Hit@1 {retrieval['hit_at_1']}/{retrieval['expected_source_cases']}, "
         f"Hit@3 {retrieval['hit_at_3']}/{retrieval['expected_source_cases']}, "
-        f"MRR {retrieval['mrr']:.3f}"
+        f"MRR {retrieval['mrr']:.3f}" if retrieval["mrr"] is not None else "MRR n/a"
     )
     for item in report["details"]:
         print(f"{item['id']}: {'PASS' if item['passed'] else 'FAIL'}")

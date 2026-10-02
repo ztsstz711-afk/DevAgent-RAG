@@ -38,9 +38,10 @@ flowchart LR
 ## 当前可复核状态
 
 - 真实来源评测使用独立索引：仅含 5 份带 URL、抓取时间和 SHA-256 的官方文档快照（不混入演示或上传文档），以及 8 条冻结烟雾题。
-- 完整本地测试已通过 `82/82`。
+- 完整本地测试已通过 `84/84`。
 - 8 条自动化烟雾题只验证“检索/拒答行为符合预设规则”，不是准确率或泛化率。在安装 requirements 并重建独立 sklearn TF-IDF 索引后，基线为 Hit@1 `5/5`、Hit@3 `5/5`、MRR `1.000`，且 3 条拒答探针全部通过；同一候选集上的 lexical reranker 没有测得额外收益，因此不默认启用。
 - 项目不采用双人主观审核作为有效性依据。当前结论仅限于固定来源、冻结题目上的可复现检索与拒答行为；不宣称真实用户满意度、事实正确性或泛化效果。
+- 另有 5 条公开 GitHub Issue 衍生的拒答控制题：Issue 原文不导入检索库，系统在缺少官方版本、发布说明或维护者结论时必须拒绝给出“保证修复”或版本特定命令。当前为 `5/5`；这是拒答边界测试，不是答案正确率评测。
 
 ## 快速开始
 
@@ -61,6 +62,7 @@ python scripts\build_index.py --config configs\real_source_eval_v7.yaml
 python scripts\verify_real_source_manifest_v7.py
 python scripts\real_source_eval_v7.py
 python scripts\real_source_eval_v7.py --config configs\real_source_eval_v7_lexical_rerank.yaml --output-stem real_source_eval_v7_lexical_rerank
+python scripts\real_source_eval_v7.py --cases data\evals\issue_derived_refusal_controls_v1.json --output-stem issue_derived_refusal_controls_v1
 ```
 
 运行本地示例：
