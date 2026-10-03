@@ -3,12 +3,14 @@
 面向 AI 开发文档与错误诊断的本地 RAG 原型。项目重点不是“检索到内容就回答”，而是把**检索、来源检查、拒答与可追踪输出**拆开，让技术诊断过程可以复查。
 
 ```text
-问题 / 错误日志
-  -> 路由与错误解析
-  -> 本地文档检索
+版本化官方文档 / 公开 Issue 问题线索
+  -> corpus manifest（URL、版本、许可、抓取时间、SHA-256）
+  -> 分块与本地检索索引
+  -> TF-IDF / Embedding / Hybrid（分别报告）
+  -> 冻结 Query + 独立 qrel
+  -> Hit@K、Recall@K、MRR
   -> Evidence Gate（来源不足则拒答）
-  -> 模板或可选 LLM 生成
-  -> 引用、质量检查与工具轨迹
+  -> 可选生成 + 引用
 ```
 
 ## 项目解决的问题
@@ -37,8 +39,12 @@ flowchart LR
 
 ## 当前可复核状态
 
-- 真实来源评测使用独立索引：仅含 5 份带 URL、抓取时间和 SHA-256 的官方文档快照（不混入演示或上传文档），以及 8 条冻结烟雾题。
-- 完整本地测试已通过 `84/84`。
+- 旧 V7 烟雾评测保留为小型来源/拒答回归；正式 V8 检索实验使用独立索引，不混入演示或上传文档。
+- V8 已冻结 7 份版本化官方文档（Python 3.12 与 scikit-learn 1.6），每条记录包含 URL、许可、版本、抓取时间和 SHA-256；共 581 个 chunk。
+- V8 的 Query 与 qrel 分文件保存：11 条冻结 Query，其中 8 条可检索问题（含 2 条公开 Issue 抽象）和 3 条证据不足的公开 Issue 拒答控制。qrel 在运行前冻结，不根据检索结果回填。
+- V8 TF-IDF 基线在这组小规模 source-level qrel 上为 Hit@1 `1.000`、Hit@3 `1.000`、Recall@5 `1.000`、MRR `1.000`，拒答率 `1.000`。这是小型冻结集上的来源命中结果，不是答案正确率、用户满意度或泛化能力。
+- Embedding 与 Hybrid 没有可报告分数：当前环境缺少 `sentence-transformers`/`torch`，安装过程无进展后已停止；报告将两者标为 `unavailable_fallback`，不会把 TF-IDF fallback 冒充为语义或混合检索实验。
+- 完整本地测试已通过 `86/86`。
 - 8 条自动化烟雾题只验证“检索/拒答行为符合预设规则”，不是准确率或泛化率。在安装 requirements 并重建独立 sklearn TF-IDF 索引后，基线为 Hit@1 `5/5`、Hit@3 `5/5`、MRR `1.000`，且 3 条拒答探针全部通过；同一候选集上的 lexical reranker 没有测得额外收益，因此不默认启用。
 - 项目不采用双人主观审核作为有效性依据。当前结论仅限于固定来源、冻结题目上的可复现检索与拒答行为；不宣称真实用户满意度、事实正确性或泛化效果。
 - 另有 5 条公开 GitHub Issue 衍生的拒答控制题：Issue 原文不导入检索库，系统在缺少官方版本、发布说明或维护者结论时必须拒绝给出“保证修复”或版本特定命令。当前为 `5/5`；这是拒答边界测试，不是答案正确率评测。
@@ -65,6 +71,15 @@ python scripts\real_source_eval_v7.py --config configs\real_source_eval_v7_lexic
 python scripts\real_source_eval_v7.py --cases data\evals\issue_derived_refusal_controls_v1.json --output-stem issue_derived_refusal_controls_v1
 ```
 
+运行正式的版本化语料检索实验：
+
+```powershell
+python scripts\fetch_official_corpus_v8.py
+python scripts\evaluate_official_retrieval_v8.py
+```
+
+该命令会将 TF-IDF、Embedding、Hybrid 分开写入同一份对比报告；只有请求模式与实际 backend 一致时才生成该模式指标。
+
 运行本地示例：
 
 ```powershell
@@ -90,5 +105,6 @@ GitHub 只保留最终代码、最终说明和可复核摘要。原始抓取文�
 
 - 不是托管知识库或生产客服系统；
 - 不把 TF-IDF fallback 描述成 embedding/hybrid 的效果；
+- 不把小规模冻结 qrel 的来源命中写成真实用户准确率或生产 RAG 效果；
 - 不在没有真实失败证据时叠加多 Agent、MCP 或复杂 UI；
 - 不把自动化烟雾测试表述为真实开发问题上的泛化能力。

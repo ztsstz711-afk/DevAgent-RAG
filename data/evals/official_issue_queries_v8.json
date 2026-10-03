@@ -1,0 +1,85 @@
+{
+  "dataset_id": "devagent_official_issue_queries_v8",
+  "protocol": "devagent_official_retrieval_v8",
+  "scope": "Frozen source-level retrieval queries. Two queries are concise abstractions of public issues; the other six are factual documentation tasks. This is not a user-satisfaction or answer-correctness benchmark.",
+  "query_construction_rule": "Queries and qrels are stored separately. A query may not name its expected source, and qrels must not be changed after retrieval results are inspected.",
+  "queries": [
+    {
+      "id": "PY-ISSUE-116654",
+      "query": "An asyncio consumer waits forever after a ThreadPoolExecutor worker calls put_nowait on the same asyncio.Queue. Is that queue safe to use across those threads?",
+      "origin_type": "public_github_issue_abstraction",
+      "origin_url": "https://github.com/python/cpython/issues/116654",
+      "should_refuse": false
+    },
+    {
+      "id": "SK-ISSUE-14501",
+      "query": "What does the copy argument control when transforming text with TfidfVectorizer?",
+      "origin_type": "public_github_issue_abstraction",
+      "origin_url": "https://github.com/scikit-learn/scikit-learn/issues/14501",
+      "should_refuse": false
+    },
+    {
+      "id": "PY-DOC-EXECUTOR-SHUTDOWN",
+      "query": "After Executor.shutdown, can I submit another callable and what happens to pending futures when cancel_futures is enabled?",
+      "origin_type": "official_documentation_task",
+      "origin_url": "https://docs.python.org/3.12/library/concurrent.futures.html",
+      "should_refuse": false
+    },
+    {
+      "id": "PY-DOC-THREADPOOL-DEADLOCK",
+      "query": "Why can a ThreadPoolExecutor deadlock when one worker waits for another future from the same executor?",
+      "origin_type": "official_documentation_task",
+      "origin_url": "https://docs.python.org/3.12/library/concurrent.futures.html",
+      "should_refuse": false
+    },
+    {
+      "id": "PY-DOC-ASYNCIO-TIMEOUT",
+      "query": "How should I impose a timeout around an asyncio queue operation when Queue methods do not accept a timeout parameter?",
+      "origin_type": "official_documentation_task",
+      "origin_url": "https://docs.python.org/3.12/library/asyncio-queue.html",
+      "should_refuse": false
+    },
+    {
+      "id": "SK-DOC-TFIDF-NGRAM",
+      "query": "Which TfidfVectorizer parameter controls the lower and upper bounds of word n-grams?",
+      "origin_type": "official_documentation_task",
+      "origin_url": "https://scikit-learn.org/1.6/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html",
+      "should_refuse": false
+    },
+    {
+      "id": "SK-DOC-PIPELINE-CACHE",
+      "query": "How can a scikit-learn Pipeline cache fitted transformers during repeated fitting?",
+      "origin_type": "official_documentation_task",
+      "origin_url": "https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html",
+      "should_refuse": false
+    },
+    {
+      "id": "SK-DOC-PERSISTENCE-SAFETY",
+      "query": "What is the security warning when loading a persisted scikit-learn model with pickle-based formats?",
+      "origin_type": "official_documentation_task",
+      "origin_url": "https://scikit-learn.org/1.6/model_persistence.html",
+      "should_refuse": false
+    },
+    {
+      "id": "PT-ISSUE-166513",
+      "query": "Can you guarantee a version-specific fix for a Windows DataLoader iterator memory leak in a PyTorch release not represented in this corpus?",
+      "origin_type": "public_github_issue_abstraction",
+      "origin_url": "https://github.com/pytorch/pytorch/issues/166513",
+      "should_refuse": true
+    },
+    {
+      "id": "LC-ISSUE-17860",
+      "query": "Can you guarantee the exact fix for a LangChain import failure after a particular package upgrade without a matching versioned source?",
+      "origin_type": "public_github_issue_abstraction",
+      "origin_url": "https://github.com/langchain-ai/langchain/issues/17860",
+      "should_refuse": true
+    },
+    {
+      "id": "HF-ISSUE-31669",
+      "query": "Can you guarantee the fix for a custom Transformers model whose pipeline receives a tokenizer string but fails on a specific release?",
+      "origin_type": "public_github_issue_abstraction",
+      "origin_url": "https://github.com/huggingface/transformers/issues/31669",
+      "should_refuse": true
+    }
+  ]
+}

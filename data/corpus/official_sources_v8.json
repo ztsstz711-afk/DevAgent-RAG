@@ -1,0 +1,62 @@
+{
+  "protocol": "devagent_official_retrieval_v8",
+  "purpose": "Versioned, licensed official-document corpus for a source-level retrieval experiment. Content is retained only for local retrieval and evaluation, not training.",
+  "sources": [
+    {
+      "source_id": "python_asyncio_queue",
+      "product": "python",
+      "version": "3.12",
+      "url": "https://docs.python.org/3.12/library/asyncio-queue.html",
+      "license": "PSF-2.0",
+      "license_url": "https://docs.python.org/3.12/license.html"
+    },
+    {
+      "source_id": "python_concurrent_futures",
+      "product": "python",
+      "version": "3.12",
+      "url": "https://docs.python.org/3.12/library/concurrent.futures.html",
+      "license": "PSF-2.0",
+      "license_url": "https://docs.python.org/3.12/license.html"
+    },
+    {
+      "source_id": "python_asyncio_task",
+      "product": "python",
+      "version": "3.12",
+      "url": "https://docs.python.org/3.12/library/asyncio-task.html",
+      "license": "PSF-2.0",
+      "license_url": "https://docs.python.org/3.12/license.html"
+    },
+    {
+      "source_id": "python_logging_cookbook",
+      "product": "python",
+      "version": "3.12",
+      "url": "https://docs.python.org/3.12/howto/logging-cookbook.html",
+      "license": "PSF-2.0",
+      "license_url": "https://docs.python.org/3.12/license.html"
+    },
+    {
+      "source_id": "sklearn_tfidfvectorizer",
+      "product": "scikit-learn",
+      "version": "1.6",
+      "url": "https://scikit-learn.org/1.6/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html",
+      "license": "BSD-3-Clause",
+      "license_url": "https://scikit-learn.org/1.6/about.html#citing-scikit-learn"
+    },
+    {
+      "source_id": "sklearn_pipeline",
+      "product": "scikit-learn",
+      "version": "1.6",
+      "url": "https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html",
+      "license": "BSD-3-Clause",
+      "license_url": "https://scikit-learn.org/1.6/about.html#citing-scikit-learn"
+    },
+    {
+      "source_id": "sklearn_model_persistence",
+      "product": "scikit-learn",
+      "version": "1.6",
+      "url": "https://scikit-learn.org/1.6/model_persistence.html",
+      "license": "BSD-3-Clause",
+      "license_url": "https://scikit-learn.org/1.6/about.html#citing-scikit-learn"
+    }
+  ]
+}
