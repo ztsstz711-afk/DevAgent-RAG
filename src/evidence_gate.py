@@ -46,7 +46,11 @@ def assess_evidence(question: str, documents: list[dict], min_score: float = 0.0
     out_of_domain = bool(matched_out_of_domain and not supported_terms)
     high_assurance_terms = sorted(query_tokens & HIGH_ASSURANCE_TERMS)
     version_specific_terms = sorted(query_tokens & VERSION_SPECIFIC_TERMS)
-    has_version_identifier = bool(VERSION_IDENTIFIER.search(question))
+    requested_versions = sorted(set(VERSION_IDENTIFIER.findall(question)))
+    has_version_identifier = bool(requested_versions)
+    evidence_versions = sorted({
+        str(item["version"]) for item in documents if item.get("version")
+    })
 
     top_score = max((float(item.get("score", 0.0)) for item in documents), default=0.0)
     evidence_text = " ".join(
@@ -75,6 +79,11 @@ def assess_evidence(question: str, documents: list[dict], min_score: float = 0.0
         # A version-specific fix cannot be grounded when the question itself
         # omits the dependency/version constraint required to locate evidence.
         issues.extend(["no_evidence", "missing_version_constraint"])
+    elif has_version_identifier and evidence_versions and not (set(requested_versions) & set(evidence_versions)):
+        # A retrieved page from a different declared version cannot establish
+        # behavior or a fix for the requested version. This is intentionally
+        # a source-coverage check, not a claim about undocumented compatibility.
+        issues.extend(["no_evidence", "version_not_in_evidence"])
     elif documents and meaningful_query and overlap_ratio < MIN_KEYWORD_OVERLAP:
         issues.extend(["no_evidence", "low_keyword_overlap"])
 
@@ -91,5 +100,7 @@ def assess_evidence(question: str, documents: list[dict], min_score: float = 0.0
         "high_assurance_terms": high_assurance_terms,
         "version_specific_terms": version_specific_terms,
         "has_version_identifier": has_version_identifier,
+        "requested_versions": requested_versions,
+        "evidence_versions": evidence_versions,
         "out_of_domain_categories": matched_out_of_domain,
     }

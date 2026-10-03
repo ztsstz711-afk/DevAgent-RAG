@@ -72,6 +72,20 @@ class EvidenceGateTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("missing_version_constraint", result["issues"])
 
+    def test_requested_version_outside_declared_evidence_is_rejected(self):
+        result = assess_evidence(
+            "Can you provide a version-specific Python 3.13 asyncio task-safety fix?",
+            [{
+                "content": "asyncio tasks are designed for async/await code.",
+                "product": "python",
+                "source": "asyncio-task.txt",
+                "version": "3.12",
+                "score": 0.4,
+            }],
+        )
+        self.assertFalse(result["valid"])
+        self.assertIn("version_not_in_evidence", result["issues"])
+
 
 if __name__ == "__main__":
     unittest.main()

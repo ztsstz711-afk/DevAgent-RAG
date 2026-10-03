@@ -49,7 +49,12 @@ def fetch_text(url: str) -> tuple[str, str]:
     return resolved_url, text
 
 
-def fetch_corpus(source_register: Path = DEFAULT_SOURCE_REGISTER, output_dir: Path | None = None) -> dict:
+def fetch_corpus(
+    source_register: Path = DEFAULT_SOURCE_REGISTER,
+    output_dir: Path | None = None,
+    manifest_name: str = "corpus_manifest_v8.json",
+    import_manifest_name: str = "_import_manifest.json",
+) -> dict:
     register = json.loads(source_register.read_text(encoding="utf-8"))
     sources = register.get("sources", [])
     if not sources:
@@ -101,11 +106,11 @@ def fetch_corpus(source_register: Path = DEFAULT_SOURCE_REGISTER, output_dir: Pa
         "source_register": str(source_register.relative_to(ROOT)).replace("\\", "/"),
         "entries": entries,
     }
-    manifest_path = output_dir / "corpus_manifest_v8.json"
+    manifest_path = output_dir / manifest_name
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     import_manifest = {
         "protocol": register["protocol"],
-        "scope": "Only documents declared in corpus_manifest_v8.json are eligible for the v8 retrieval index.",
+        "scope": f"Only documents declared in {manifest_name} are eligible for this retrieval index.",
         "imported_docs_dir": str(output_dir.relative_to(ROOT)).replace("\\", "/"),
         "total_imported": len(imported_documents),
         "documents_per_source": {
@@ -114,7 +119,7 @@ def fetch_corpus(source_register: Path = DEFAULT_SOURCE_REGISTER, output_dir: Pa
         },
         "documents": imported_documents,
     }
-    (output_dir / "_import_manifest.json").write_text(
+    (output_dir / import_manifest_name).write_text(
         json.dumps(import_manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     return {"entries": len(entries), "manifest": str(manifest_path), "output_dir": str(output_dir)}
@@ -124,5 +129,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-register", type=Path, default=DEFAULT_SOURCE_REGISTER)
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--manifest-name", default="corpus_manifest_v8.json")
+    parser.add_argument("--import-manifest-name", default="_import_manifest.json")
     args = parser.parse_args()
-    print(json.dumps(fetch_corpus(args.source_register, args.output_dir), ensure_ascii=False))
+    print(json.dumps(
+        fetch_corpus(args.source_register, args.output_dir, args.manifest_name, args.import_manifest_name),
+        ensure_ascii=False,
+    ))

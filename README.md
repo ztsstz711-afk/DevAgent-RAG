@@ -44,7 +44,9 @@ flowchart LR
 - V8 的 Query 与 qrel 分文件保存：11 条冻结 Query，其中 8 条可检索问题（含 2 条公开 Issue 抽象）和 3 条证据不足的公开 Issue 拒答控制。qrel 在运行前冻结，不根据检索结果回填。
 - V8 的 TF-IDF、Embedding（`sentence-transformers/all-MiniLM-L6-v2`）和 Hybrid 均已实际运行，实际 backend 分别为 `sklearn_tfidf`、`sentence_transformers`、`hybrid_tfidf_embedding`；三者在这组小规模 source-level qrel 上均为 Hit@1 `1.000`、Hit@3 `1.000`、Recall@5 `1.000`、MRR `1.000`，拒答率 `1.000`。
 - 这些是 7 份文档、8 条正向检索题和 3 条拒答控制上的来源命中结果；不代表答案正确率、用户满意度、业务效果或泛化能力。若未来某模式回退到 TF-IDF，报告会标为 `unavailable_fallback` 并不生成该模式分数。
-- 完整本地测试已通过 `86/86`。
+- V9 保留为更宽的冻结 holdout：12 份官方文档、773 个 chunk、16 条 Query（12 条正向，其中 10 条为公开 Issue 抽象；4 条版本越界拒答控制）。TF-IDF 与 Hybrid 的 Hit@1、Recall@5、MRR 均为 `1.000`；Embedding 为 `0.917`。三路拒答率均为 `0.750`：Python 3.13 的版本越界控制被错误放行，说明原 Evidence Gate 没有校验“请求版本是否被已检索的版本化来源覆盖”。
+- 该 V9 负结果保持不变，不用于调参。随后仅在独立开发控制中加入版本范围门：问题指定版本而检索证据的声明版本不匹配时，Evidence Gate 返回 `version_not_in_evidence`。该规则通过单元测试；其效果须在后续新冻结集复核，不能倒写为 V9 的改进结果。
+- 完整本地测试已通过 `88/88`。
 - 8 条自动化烟雾题只验证“检索/拒答行为符合预设规则”，不是准确率或泛化率。在安装 requirements 并重建独立 sklearn TF-IDF 索引后，基线为 Hit@1 `5/5`、Hit@3 `5/5`、MRR `1.000`，且 3 条拒答探针全部通过；同一候选集上的 lexical reranker 没有测得额外收益，因此不默认启用。
 - 项目不采用双人主观审核作为有效性依据。当前结论仅限于固定来源、冻结题目上的可复现检索与拒答行为；不宣称真实用户满意度、事实正确性或泛化效果。
 - 另有 5 条公开 GitHub Issue 衍生的拒答控制题：Issue 原文不导入检索库，系统在缺少官方版本、发布说明或维护者结论时必须拒绝给出“保证修复”或版本特定命令。当前为 `5/5`；这是拒答边界测试，不是答案正确率评测。

@@ -69,6 +69,7 @@ def split_document(document: dict, max_chars: int = 1200, overlap: int = 120) ->
             "original_path": document.get("original_path", document.get("path", "")),
             "imported_path": document.get("imported_path"),
             "file_type": document.get("file_type", document.get("extension", "")),
+            "version": document.get("version"),
             "is_imported": document.get("is_imported", False),
             "chunk_id": f"chunk_{index:03d}",
         })

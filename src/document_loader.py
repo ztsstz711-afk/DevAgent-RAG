@@ -39,6 +39,7 @@ def load_document(path: str | Path, metadata: dict | None = None) -> dict:
         "original_path": metadata.get("original_path", str(source)),
         "imported_path": metadata.get("imported_path"),
         "file_type": metadata.get("file_type", source.suffix.lower()),
+        "version": metadata.get("version"),
         "is_imported": bool(metadata),
     }
 

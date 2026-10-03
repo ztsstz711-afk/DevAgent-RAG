@@ -120,7 +120,7 @@ def _evaluate_mode(mode: str, config_path: str, items: list[dict], qrels: dict) 
 
 def _write_markdown(report: dict, target: Path) -> None:
     lines = [
-        "# Official Corpus Retrieval Experiment V8",
+        f"# Official Corpus Retrieval Experiment: {report['protocol']['id']}",
         "",
         "This is a source-level retrieval experiment over a frozen, versioned official-document corpus. It does not measure answer correctness, user preference, or production quality.",
         "",
@@ -149,7 +149,7 @@ def evaluate(config_path: str = DEFAULT_CONFIG, queries_path: Path = DEFAULT_QUE
     chunks, index_path = build_index(config_path=config_path)
     config = RAGPipeline(config_path=config_path).config
     corpus_dir = project_path(config["external_docs"]["imported_docs_dir"])
-    manifest_path = corpus_dir / "corpus_manifest_v8.json"
+    manifest_path = corpus_dir / config["external_docs"].get("manifest_filename", "corpus_manifest_v8.json")
     if not manifest_path.exists():
         raise FileNotFoundError(f"Missing frozen corpus manifest: {manifest_path}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
