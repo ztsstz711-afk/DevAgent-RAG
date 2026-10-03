@@ -42,8 +42,8 @@ flowchart LR
 - 旧 V7 烟雾评测保留为小型来源/拒答回归；正式 V8 检索实验使用独立索引，不混入演示或上传文档。
 - V8 已冻结 7 份版本化官方文档（Python 3.12 与 scikit-learn 1.6），每条记录包含 URL、许可、版本、抓取时间和 SHA-256；共 581 个 chunk。
 - V8 的 Query 与 qrel 分文件保存：11 条冻结 Query，其中 8 条可检索问题（含 2 条公开 Issue 抽象）和 3 条证据不足的公开 Issue 拒答控制。qrel 在运行前冻结，不根据检索结果回填。
-- V8 TF-IDF 基线在这组小规模 source-level qrel 上为 Hit@1 `1.000`、Hit@3 `1.000`、Recall@5 `1.000`、MRR `1.000`，拒答率 `1.000`。这是小型冻结集上的来源命中结果，不是答案正确率、用户满意度或泛化能力。
-- Embedding 与 Hybrid 没有可报告分数：当前环境缺少 `sentence-transformers`/`torch`，安装过程无进展后已停止；报告将两者标为 `unavailable_fallback`，不会把 TF-IDF fallback 冒充为语义或混合检索实验。
+- V8 的 TF-IDF、Embedding（`sentence-transformers/all-MiniLM-L6-v2`）和 Hybrid 均已实际运行，实际 backend 分别为 `sklearn_tfidf`、`sentence_transformers`、`hybrid_tfidf_embedding`；三者在这组小规模 source-level qrel 上均为 Hit@1 `1.000`、Hit@3 `1.000`、Recall@5 `1.000`、MRR `1.000`，拒答率 `1.000`。
+- 这些是 7 份文档、8 条正向检索题和 3 条拒答控制上的来源命中结果；不代表答案正确率、用户满意度、业务效果或泛化能力。若未来某模式回退到 TF-IDF，报告会标为 `unavailable_fallback` 并不生成该模式分数。
 - 完整本地测试已通过 `86/86`。
 - 8 条自动化烟雾题只验证“检索/拒答行为符合预设规则”，不是准确率或泛化率。在安装 requirements 并重建独立 sklearn TF-IDF 索引后，基线为 Hit@1 `5/5`、Hit@3 `5/5`、MRR `1.000`，且 3 条拒答探针全部通过；同一候选集上的 lexical reranker 没有测得额外收益，因此不默认启用。
 - 项目不采用双人主观审核作为有效性依据。当前结论仅限于固定来源、冻结题目上的可复现检索与拒答行为；不宣称真实用户满意度、事实正确性或泛化效果。
